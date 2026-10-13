@@ -1,28 +1,63 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import {
+  DEFAULT_FILTERS,
+  buildHomeHref,
+  parseHomeParams,
+  type HomeFilters,
+} from '@/lib/home-params';
+import { useSavedHomes } from '@/components/home/SavedHomesProvider';
 
 interface NavbarProps {
-  activeTab?: string;
-  onTabChange?: (tab: string) => void;
-  savedCount?: number;
+  /** Current URL filters (Buy/Rent tabs keep category and search). */
+  filters?: HomeFilters;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  activeTab = 'Buy',
-  onTabChange,
-  savedCount = 0,
-}) => {
+type NavTab = 'Buy' | 'Rent' | 'Sell' | 'Saved Homes';
+const NAV_LINKS: NavTab[] = ['Buy', 'Rent', 'Sell', 'Saved Homes'];
+
+/** Reads the URL filters on the client; must be rendered inside <Suspense>. */
+export const NavbarWithSearchParams: React.FC = () => {
+  const searchParams = useSearchParams();
+  const filters = parseHomeParams(Object.fromEntries(searchParams.entries()));
+  return <Navbar filters={filters} />;
+};
+
+export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentTab, setCurrentTab] = useState(activeTab);
+  const { savedIds, view, setView } = useSavedHomes();
+  const savedCount = savedIds.length;
 
-  const navLinks = ['Buy', 'Rent', 'Sell', 'Saved Homes'];
+  const navLinks = NAV_LINKS;
+  const activeTab: NavTab =
+    view === 'saved' ? 'Saved Homes' : filters.listing === 'rent' ? 'Rent' : 'Buy';
 
-  const handleNavClick = (tab: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    setCurrentTab(tab);
-    if (onTabChange) onTabChange(tab);
+  const hrefFor = (tab: NavTab): string | null => {
+    if (tab === 'Buy') return buildHomeHref(filters, { listing: 'all' });
+    if (tab === 'Rent') return buildHomeHref(filters, { listing: 'rent' });
+    return null;
+  };
+
+  const handleTabClick = (tab: NavTab) => {
+    if (tab === 'Saved Homes') setView('saved');
+    else if (tab === 'Buy' || tab === 'Rent') setView('browse');
     setMobileMenuOpen(false);
+  };
+
+  const renderTab = (tab: NavTab, className: string, children: React.ReactNode) => {
+    const href = hrefFor(tab);
+    return href ? (
+      <Link key={tab} href={href} onClick={() => handleTabClick(tab)} className={className}>
+        {children}
+      </Link>
+    ) : (
+      <button key={tab} type="button" onClick={() => handleTabClick(tab)} className={className}>
+        {children}
+      </button>
+    );
   };
 
   return (
@@ -30,9 +65,10 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <div
+          <Link
+            href="/"
             className="flex-shrink-0 flex items-center gap-2 cursor-pointer select-none"
-            onClick={() => setCurrentTab('Buy')}
+            onClick={() => setView('browse')}
           >
             <div className="w-8 h-8 rounded-lg bg-nordic-dark flex items-center justify-center text-white shadow-sm">
               <span className="material-icons text-white text-lg">apartment</span>
@@ -40,29 +76,27 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="text-xl font-semibold tracking-tight text-nordic-dark">
               LuxeEstate
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((tab) => {
-              const isActive = currentTab === tab;
-              return (
-                <button
-                  key={tab}
-                  onClick={(e) => handleNavClick(tab, e)}
-                  className={`font-medium text-sm px-1 py-1 transition-all ${
-                    isActive
-                      ? 'text-mosque border-b-2 border-mosque'
-                      : 'text-nordic-dark/70 hover:text-nordic-dark hover:border-b-2 hover:border-nordic-dark/20'
-                  }`}
-                >
+              const isActive = activeTab === tab;
+              return renderTab(
+                tab,
+                `font-medium text-sm px-1 py-1 transition-all ${
+                  isActive
+                    ? 'text-mosque border-b-2 border-mosque'
+                    : 'text-nordic-dark/70 hover:text-nordic-dark hover:border-b-2 hover:border-nordic-dark/20'
+                }`,
+                <>
                   {tab}
                   {tab === 'Saved Homes' && savedCount > 0 && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-mosque/10 text-mosque font-semibold">
                       {savedCount}
                     </span>
                   )}
-                </button>
+                </>
               );
             })}
           </div>
@@ -119,19 +153,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       >
         <div className="px-4 space-y-1">
           {navLinks.map((tab) => {
-            const isActive = currentTab === tab;
-            return (
-              <button
-                key={tab}
-                onClick={(e) => handleNavClick(tab, e)}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive
-                    ? 'text-mosque bg-mosque/10'
-                    : 'text-nordic-dark hover:bg-black/5'
-                }`}
-              >
-                {tab}
-              </button>
+            const isActive = activeTab === tab;
+            return renderTab(
+              tab,
+              `block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                isActive ? 'text-mosque bg-mosque/10' : 'text-nordic-dark hover:bg-black/5'
+              }`,
+              tab
             );
           })}
         </div>

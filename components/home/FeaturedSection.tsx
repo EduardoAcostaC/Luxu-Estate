@@ -3,19 +3,18 @@
 import React from 'react';
 import { Property } from '@/types/property';
 import { FeaturedPropertyCard } from './FeaturedPropertyCard';
+import { useSavedHomes } from './SavedHomesProvider';
 
 interface FeaturedSectionProps {
   properties: Property[];
-  savedPropertyIds?: string[];
-  onToggleSave?: (id: string) => void;
 }
 
-export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
-  properties,
-  savedPropertyIds = [],
-  onToggleSave,
-}) => {
-  if (properties.length === 0) return null;
+export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ properties }) => {
+  const { savedIds, isSaved, toggleSave, view } = useSavedHomes();
+
+  const visible = view === 'saved' ? properties.filter((p) => savedIds.includes(p.id)) : properties;
+
+  if (visible.length === 0) return null;
 
   return (
     <section className="mb-16">
@@ -37,12 +36,12 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {properties.map((property) => (
+        {visible.map((property) => (
           <FeaturedPropertyCard
             key={property.id}
             property={property}
-            isSaved={savedPropertyIds.includes(property.id)}
-            onToggleSave={onToggleSave}
+            isSaved={isSaved(property.id)}
+            onToggleSave={toggleSave}
           />
         ))}
       </div>

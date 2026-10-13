@@ -18,3 +18,5 @@ export interface Property {
 
 export type CategoryFilter = 'All' | 'House' | 'Apartment' | 'Villa' | 'Penthouse';
 export type ListingTypeFilter = 'All' | 'Buy' | 'Rent';
+/** URL-driven listing filter (maps to the `listing_type` DB enum). */
+export type ListingFilter = 'all' | 'sale' | 'rent';
