@@ -96,19 +96,64 @@ function rowToPropertyDetail(row: PropertyRow, images: PropertyImageRow[] = []):
   };
 }
 
-/** Applies the shared category / listing / search filters to a properties query. */
+/** Applies the shared category / listing / search / advanced filters to a properties query. */
 function applyFilters<
   T extends {
     eq: (column: string, value: string) => T;
     or: (filters: string) => T;
+    gte: (column: string, value: number) => T;
+    lte: (column: string, value: number) => T;
+    ilike: (column: string, pattern: string) => T;
+    contains: (column: string, value: string[]) => T;
   },
->(query: T, { category, listing, q }: FilterArgs): T {
+>(query: T, filters: FilterArgs): T {
   let result = query;
-  if (category !== 'All') result = result.eq('property_type', category);
-  if (listing !== 'all') result = result.eq('listing_type', listing);
-  if (q) result = result.or(`title.ilike.%${q}%,location.ilike.%${q}%`);
+  if (filters.category && filters.category !== 'All') {
+    result = result.eq('property_type', filters.category);
+  }
+  if (filters.listing && filters.listing !== 'all') {
+    result = result.eq('listing_type', filters.listing);
+  }
+  if (filters.q) {
+    result = result.or(`title.ilike.%${filters.q}%,location.ilike.%${filters.q}%`);
+  }
+  if (filters.location) {
+    result = result.ilike('location', `%${filters.location}%`);
+  }
+  if (filters.minPrice !== undefined && filters.minPrice > 0) {
+    result = result.gte('price', filters.minPrice);
+  }
+  if (filters.maxPrice !== undefined && filters.maxPrice > 0) {
+    result = result.lte('price', filters.maxPrice);
+  }
+  if (filters.beds !== undefined && filters.beds > 0) {
+    result = result.gte('beds', filters.beds);
+  }
+  if (filters.baths !== undefined && filters.baths > 0) {
+    result = result.gte('baths', filters.baths);
+  }
+  if (filters.amenities && filters.amenities.length > 0) {
+    result = result.contains('amenities', filters.amenities);
+  }
   return result;
 }
+
+/** Returns the exact count of matching properties across all listings for live filter preview. */
+export async function getPropertiesCount(filters: FilterArgs): Promise<number> {
+  const supabase = createSupabaseServerClient();
+  const { count, error } = await applyFilters(
+    supabase
+      .from('properties')
+      .select('id', { count: 'exact', head: true }),
+    filters
+  );
+  if (error) {
+    console.error('Failed to get properties count:', error);
+    return 0;
+  }
+  return count ?? 0;
+}
+
 
 /**
  * Server-side paginated "New in Market" listing.

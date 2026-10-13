@@ -18,8 +18,8 @@ export async function HeroContainer({ searchParams }: { searchParams: HomeSearch
 }
 
 export async function FeaturedContent({ searchParams }: { searchParams: HomeSearchParams }) {
-  const { category, listing, q } = parseHomeParams(await searchParams);
-  const featured = await getFeaturedProperties({ category, listing, q });
+  const filters = parseHomeParams(await searchParams);
+  const featured = await getFeaturedProperties(filters);
   return <FeaturedSection properties={featured} />;
 }
 

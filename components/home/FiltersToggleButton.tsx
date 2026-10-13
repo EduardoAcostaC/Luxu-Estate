@@ -1,20 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 
-/** Visual-only "Filters" toggle from the original design (kept client-side). */
-export const FiltersToggleButton: React.FC = () => {
-  const [filterActive, setFilterActive] = useState(false);
+interface FiltersToggleButtonProps {
+  onClick: () => void;
+  activeCount?: number;
+}
+
+export const FiltersToggleButton: React.FC<FiltersToggleButtonProps> = ({
+  onClick,
+  activeCount = 0,
+}) => {
+  const hasActiveFilters = activeCount > 0;
 
   return (
     <button
       type="button"
-      onClick={() => setFilterActive(!filterActive)}
-      className={`whitespace-nowrap flex items-center gap-1 px-4 py-2 rounded-full font-medium text-sm transition-colors cursor-pointer ${
-        filterActive ? 'bg-mosque text-white' : 'text-nordic-dark hover:bg-black/5'
+      onClick={onClick}
+      className={`whitespace-nowrap flex items-center gap-1.5 px-4 py-2 rounded-full font-medium text-sm transition-all cursor-pointer shadow-xs ${
+        hasActiveFilters
+          ? 'bg-mosque text-white shadow-md shadow-mosque/20'
+          : 'bg-white border border-nordic-dark/10 text-nordic-dark hover:bg-black/5 hover:border-mosque/40'
       }`}
     >
-      <span className="material-icons text-base">tune</span> Filters
+      <span className="material-icons text-base">tune</span>
+      <span>Filters</span>
+      {hasActiveFilters && (
+        <span className="ml-0.5 px-1.5 py-0.2 bg-white text-mosque rounded-full text-xs font-bold leading-tight">
+          {activeCount}
+        </span>
+      )}
     </button>
   );
 };
+

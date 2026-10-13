@@ -1,14 +1,25 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Form from 'next/form';
-import { CATEGORIES, buildHomeHref, type HomeFilters } from '@/lib/home-params';
+import {
+  CATEGORIES,
+  buildHomeHref,
+  countActiveModalFilters,
+  type HomeFilters,
+} from '@/lib/home-params';
 import { FiltersToggleButton } from './FiltersToggleButton';
+import { FiltersModal } from './FiltersModal';
 
 interface HeroSearchProps {
   filters: HomeFilters;
 }
 
 export const HeroSearch: React.FC<HeroSearchProps> = ({ filters }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const activeModalCount = countActiveModalFilters(filters);
+
   return (
     <section className="py-12 md:py-16">
       <div className="max-w-3xl mx-auto text-center space-y-8">
@@ -21,7 +32,7 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({ filters }) => {
           .
         </h1>
 
-        {/* Search Bar Form (server-driven: submits ?q= and keeps the other filters) */}
+        {/* Search Bar Form (server-driven: submits ?q= and preserves active filters) */}
         <Form action="/" className="relative group max-w-2xl mx-auto">
           {filters.category !== 'All' && (
             <input type="hidden" name="category" value={filters.category} />
@@ -29,6 +40,25 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({ filters }) => {
           {filters.listing !== 'all' && (
             <input type="hidden" name="listing" value={filters.listing} />
           )}
+          {filters.location && (
+            <input type="hidden" name="location" value={filters.location} />
+          )}
+          {filters.minPrice !== undefined && filters.minPrice > 0 && (
+            <input type="hidden" name="minPrice" value={filters.minPrice} />
+          )}
+          {filters.maxPrice !== undefined && filters.maxPrice > 0 && (
+            <input type="hidden" name="maxPrice" value={filters.maxPrice} />
+          )}
+          {filters.beds !== undefined && filters.beds > 0 && (
+            <input type="hidden" name="beds" value={filters.beds} />
+          )}
+          {filters.baths !== undefined && filters.baths > 0 && (
+            <input type="hidden" name="baths" value={filters.baths} />
+          )}
+          {filters.amenities && filters.amenities.length > 0 && (
+            <input type="hidden" name="amenities" value={filters.amenities.join(',')} />
+          )}
+
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <span className="material-icons text-nordic-muted text-2xl group-focus-within:text-mosque transition-colors">
               search
@@ -72,9 +102,20 @@ export const HeroSearch: React.FC<HeroSearchProps> = ({ filters }) => {
 
           <div className="w-px h-6 bg-nordic-dark/10 mx-2 flex-shrink-0"></div>
 
-          <FiltersToggleButton />
+          <FiltersToggleButton
+            onClick={() => setIsModalOpen(true)}
+            activeCount={activeModalCount}
+          />
         </div>
       </div>
+
+      {/* Advanced Filters Modal */}
+      <FiltersModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        currentFilters={filters}
+      />
     </section>
   );
 };
+
