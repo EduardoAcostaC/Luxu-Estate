@@ -1,5 +1,15 @@
+export interface PropertyImage {
+  id: string;
+  propertyId: string;
+  imageUrl: string;
+  altText: string;
+  caption?: string;
+  displayOrder: number;
+}
+
 export interface Property {
   id: string;
+  slug: string;
   title: string;
   location: string;
   price: number;
@@ -14,6 +24,20 @@ export interface Property {
   listingType: 'sale' | 'rent'; // 'sale' or 'rent'
   propertyType: 'House' | 'Apartment' | 'Villa' | 'Penthouse';
   isFeatured?: boolean;
+}
+
+export interface PropertyDetail extends Property {
+  description: string;
+  garage: number;
+  amenities: string[];
+  latitude: number;
+  longitude: number;
+  agentName: string;
+  agentTitle: string;
+  agentPhone: string;
+  agentEmail: string;
+  agentAvatarUrl: string;
+  images: PropertyImage[];
 }
 
 export type CategoryFilter = 'All' | 'House' | 'Apartment' | 'Villa' | 'Penthouse';

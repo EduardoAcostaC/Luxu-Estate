@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { SavedHomesProvider } from '@/components/home/SavedHomesProvider';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -43,7 +44,9 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white min-h-screen">
-        {children}
+        <SavedHomesProvider>
+          {children}
+        </SavedHomesProvider>
       </body>
     </html>
   );
