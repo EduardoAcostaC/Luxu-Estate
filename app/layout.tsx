@@ -1,5 +1,10 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+
+export const viewport: Viewport = {
+  themeColor: '#EEF6F6',
+  colorScheme: 'light',
+};
 
 export const metadata: Metadata = {
   title: 'LuxeEstate — Premium Real Estate',
@@ -12,8 +17,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="light" style={{ colorScheme: 'light' }}>
       <head>
+        <meta name="color-scheme" content="light" />
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
