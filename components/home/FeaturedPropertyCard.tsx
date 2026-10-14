@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Property } from '@/types/property';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, translateTag, translatePricePeriod } from '@/lib/i18n';
 
 interface FeaturedPropertyCardProps {
   property: Property;
@@ -29,13 +29,7 @@ export const FeaturedPropertyCard: React.FC<FeaturedPropertyCardProps> = ({
     }
   };
 
-  const tagLabel = property.tag
-    ? property.tag.toUpperCase() === 'EXCLUSIVE'
-      ? t('featured.exclusive')
-      : property.tag.toUpperCase() === 'NEW LISTING'
-        ? t('featured.newListing')
-        : property.tag
-    : null;
+  const tagLabel = translateTag(property.tag, t);
 
   return (
     <Link
@@ -93,6 +87,11 @@ export const FeaturedPropertyCard: React.FC<FeaturedPropertyCardProps> = ({
             </div>
             <span className="text-xl font-semibold text-mosque">
               {property.priceFormatted}
+              {property.pricePeriod && (
+                <span className="text-sm font-normal text-nordic-muted ml-1">
+                  {translatePricePeriod(property.pricePeriod, t)}
+                </span>
+              )}
             </span>
           </div>
 

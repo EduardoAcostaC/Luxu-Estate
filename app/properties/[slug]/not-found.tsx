@@ -1,8 +1,13 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/Navbar';
+import { useTranslation } from '@/lib/i18n';
 
 export default function PropertyNotFound() {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-background-light text-nordic-dark flex flex-col">
       <Navbar />
@@ -13,19 +18,19 @@ export default function PropertyNotFound() {
         </div>
 
         <h1 className="text-3xl sm:text-4xl font-bold text-nordic-dark mb-3">
-          Property Not Found
+          {t('notFound.title')}
         </h1>
 
         <p className="text-nordic-muted max-w-md mx-auto mb-8 text-base">
-          The property you are looking for may have been sold, leased, or the link might be incorrect.
+          {t('notFound.description')}
         </p>
 
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-mosque hover:bg-[#005544] text-white px-6 py-3 rounded-lg font-medium shadow-md transition-all"
+          className="inline-flex items-center gap-2 bg-mosque hover:bg-[#005544] text-white px-6 py-3 rounded-lg font-medium shadow-md transition-all cursor-pointer"
         >
           <span className="material-icons text-base">arrow_back</span>
-          Return to Properties
+          {t('notFound.backHome')}
         </Link>
       </main>
     </div>

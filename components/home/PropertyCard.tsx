@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Property } from '@/types/property';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, translatePricePeriod } from '@/lib/i18n';
 
 interface PropertyCardProps {
   property: Property;
@@ -82,7 +82,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               {property.priceFormatted}
               {property.pricePeriod && (
                 <span className="text-sm font-normal text-nordic-muted">
-                  {property.pricePeriod}
+                  {translatePricePeriod(property.pricePeriod, t)}
                 </span>
               )}
             </h3>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { PropertyDetail } from '@/types/property';
 import { useSavedHomes } from '@/components/home/SavedHomesProvider';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, translatePricePeriod } from '@/lib/i18n';
 import { PropertyMapWrapper } from './PropertyMapWrapper';
 import { ScheduleVisitModal } from './ScheduleVisitModal';
 
@@ -40,7 +40,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
                 {property.priceFormatted}
                 {property.pricePeriod && (
                   <span className="text-base text-nordic-muted font-normal">
-                    {property.pricePeriod}
+                    {translatePricePeriod(property.pricePeriod, t)}
                   </span>
                 )}
               </h1>
@@ -96,17 +96,17 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Chat on WhatsApp"
+                aria-label={t('sidebar.chatWhatsApp')}
                 className="p-2.5 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors"
-                title="Chat on WhatsApp"
+                title={t('sidebar.chatWhatsApp')}
               >
                 <span className="material-icons text-lg">chat</span>
               </a>
               <a
                 href={`tel:${property.agentPhone}`}
-                aria-label="Call Agent"
+                aria-label={t('sidebar.callAgent')}
                 className="p-2.5 rounded-full bg-mosque/10 text-mosque hover:bg-mosque hover:text-white transition-colors"
-                title="Call Agent"
+                title={t('sidebar.callAgent')}
               >
                 <span className="material-icons text-lg">call</span>
               </a>

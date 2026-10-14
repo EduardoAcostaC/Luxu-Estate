@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { PropertyImage } from '@/types/property';
+import { useTranslation, translateTag } from '@/lib/i18n';
 
 interface PropertyGalleryProps {
   images: PropertyImage[];
@@ -17,6 +18,7 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
   tag,
   listingType,
 }) => {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -63,11 +65,11 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         <div className="absolute top-4 left-4 flex gap-2 z-10">
           {tag && (
             <span className="bg-mosque text-white text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-              {tag}
+              {translateTag(tag, t) || tag}
             </span>
           )}
           <span className="bg-white/90 backdrop-blur-md text-nordic-dark text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-            {listingType === 'rent' ? 'For Rent' : 'For Sale'}
+            {listingType === 'rent' ? t('market.forRent') : t('market.forSale')}
           </span>
         </div>
 
@@ -75,10 +77,10 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
-          className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-nordic-dark px-4 py-2 rounded-lg text-sm font-medium shadow-lg backdrop-blur-md transition-all flex items-center gap-2 z-10 hover:shadow-xl active:scale-95"
+          className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-nordic-dark px-4 py-2 rounded-lg text-sm font-medium shadow-lg backdrop-blur-md transition-all flex items-center gap-2 z-10 hover:shadow-xl active:scale-95 cursor-pointer"
         >
           <span className="material-icons text-sm text-mosque">grid_view</span>
-          View All Photos ({images.length})
+          {t('gallery.viewAllPhotos', { count: images.length })}
         </button>
       </div>
 
@@ -121,13 +123,16 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
           {/* Top Bar */}
           <div className="flex justify-between items-center text-white z-10">
             <div className="text-sm font-medium tracking-wide">
-              {title} &mdash; <span className="text-white/70">{activeIndex + 1} of {images.length}</span>
+              {title} &mdash;{' '}
+              <span className="text-white/70">
+                {t('gallery.photoCounter', { current: activeIndex + 1, total: images.length })}
+              </span>
             </div>
             <button
               type="button"
               onClick={() => setLightboxOpen(false)}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-              aria-label="Close photo gallery"
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              aria-label={t('gallery.closeLightbox')}
             >
               <span className="material-icons text-2xl">close</span>
             </button>
@@ -149,8 +154,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               type="button"
               onClick={handlePrev}
-              className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm"
-              aria-label="Previous photo"
+              className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm cursor-pointer"
+              aria-label={t('gallery.prevPhoto')}
             >
               <span className="material-icons text-3xl">chevron_left</span>
             </button>
@@ -159,8 +164,8 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({
             <button
               type="button"
               onClick={handleNext}
-              className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm"
-              aria-label="Next photo"
+              className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center transition-all backdrop-blur-sm cursor-pointer"
+              aria-label={t('gallery.nextPhoto')}
             >
               <span className="material-icons text-3xl">chevron_right</span>
             </button>

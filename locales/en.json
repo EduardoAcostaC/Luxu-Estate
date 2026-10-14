@@ -24,6 +24,14 @@
     "Villa": "Villa",
     "Penthouse": "Penthouse"
   },
+  "tags": {
+    "exclusive": "EXCLUSIVE",
+    "newArrival": "NEW ARRIVAL",
+    "newListing": "NEW LISTING",
+    "new": "NEW",
+    "popular": "POPULAR",
+    "luxury": "LUXURY"
+  },
   "featured": {
     "title": "Featured Collections",
     "subtitle": "Curated properties for the discerning eye.",
@@ -40,7 +48,34 @@
     "forSale": "FOR SALE",
     "forRent": "FOR RENT",
     "noResultsTitle": "No properties found",
-    "noResultsSubtitle": "Try adjusting your search filters"
+    "noResultsSubtitle": "Try adjusting your search filters to see more results.",
+    "noSavedTitle": "No saved homes here yet",
+    "noSavedSubtitle": "Click the heart icon on any property to save it to your collection."
+  },
+  "gallery": {
+    "viewAllPhotos": "View All Photos ({count})",
+    "photoCounter": "{current} of {total}",
+    "closeLightbox": "Close photo gallery",
+    "prevPhoto": "Previous photo",
+    "nextPhoto": "Next photo"
+  },
+  "map": {
+    "viewOnGoogleMaps": "View on Google Maps",
+    "loadingMap": "Loading interactive map..."
+  },
+  "sidebar": {
+    "chatWhatsApp": "Chat on WhatsApp",
+    "callAgent": "Call Agent"
+  },
+  "notFound": {
+    "title": "Property Not Found",
+    "description": "The property you are looking for may have been sold, leased, or the link might be incorrect.",
+    "backHome": "Return to Properties"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "We couldn't load the properties. Please try again.",
+    "retry": "Try again"
   },
   "pagination": {
     "showing": "Showing {from}–{to} of {total} properties",

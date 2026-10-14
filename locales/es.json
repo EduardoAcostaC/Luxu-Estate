@@ -24,6 +24,14 @@
     "Villa": "Villas",
     "Penthouse": "Áticos"
   },
+  "tags": {
+    "exclusive": "EXCLUSIVO",
+    "newArrival": "NUEVA",
+    "newListing": "NUEVA",
+    "new": "NUEVA",
+    "popular": "POPULAR",
+    "luxury": "DE LUJO"
+  },
   "featured": {
     "title": "Colecciones Destacadas",
     "subtitle": "Propiedades seleccionadas para el ojo exigente.",
@@ -40,7 +48,34 @@
     "forSale": "EN VENTA",
     "forRent": "EN RENTA",
     "noResultsTitle": "No se encontraron propiedades",
-    "noResultsSubtitle": "Intenta ajustar tus filtros de búsqueda"
+    "noResultsSubtitle": "Intenta ajustar tus filtros de búsqueda para ver más resultados.",
+    "noSavedTitle": "Aún no tienes propiedades guardadas",
+    "noSavedSubtitle": "Haz clic en el icono de corazón de cualquier propiedad para guardarla en tu colección."
+  },
+  "gallery": {
+    "viewAllPhotos": "Ver todas las fotos ({count})",
+    "photoCounter": "{current} de {total}",
+    "closeLightbox": "Cerrar galería de fotos",
+    "prevPhoto": "Foto anterior",
+    "nextPhoto": "Foto siguiente"
+  },
+  "map": {
+    "viewOnGoogleMaps": "Ver en Google Maps",
+    "loadingMap": "Cargando mapa interactivo..."
+  },
+  "sidebar": {
+    "chatWhatsApp": "Chatear por WhatsApp",
+    "callAgent": "Llamar al agente"
+  },
+  "notFound": {
+    "title": "Propiedad No Encontrada",
+    "description": "La propiedad que estás buscando puede haber sido vendida, rentada o el enlace es incorrecto.",
+    "backHome": "Volver a Propiedades"
+  },
+  "error": {
+    "title": "Algo salió mal",
+    "description": "No pudimos cargar las propiedades. Por favor intenta de nuevo.",
+    "retry": "Intentar de nuevo"
   },
   "pagination": {
     "showing": "Mostrando {from}–{to} de {total} propiedades",

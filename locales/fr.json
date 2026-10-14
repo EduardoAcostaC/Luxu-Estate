@@ -24,6 +24,14 @@
     "Villa": "Villas",
     "Penthouse": "Penthouses"
   },
+  "tags": {
+    "exclusive": "EXCLUSIF",
+    "newArrival": "NOUVEAUTÉ",
+    "newListing": "NOUVELLE ANNONCE",
+    "new": "NOUVEAU",
+    "popular": "POPULAIRE",
+    "luxury": "DE LUXE"
+  },
   "featured": {
     "title": "Collections En Vedette",
     "subtitle": "Propriétés sélectionnées pour un regard exigeant.",
@@ -40,7 +48,34 @@
     "forSale": "À VENDRE",
     "forRent": "À LOUER",
     "noResultsTitle": "Aucune propriété trouvée",
-    "noResultsSubtitle": "Essayez d'ajuster vos filtres de recherche"
+    "noResultsSubtitle": "Essayez d'ajuster vos filtres de recherche pour voir plus de résultats.",
+    "noSavedTitle": "Aucun bien favori pour l'instant",
+    "noSavedSubtitle": "Cliquez sur l'icône de cœur sur n'importe quel bien pour l'ajouter à votre sélection."
+  },
+  "gallery": {
+    "viewAllPhotos": "Voir toutes les photos ({count})",
+    "photoCounter": "{current} sur {total}",
+    "closeLightbox": "Fermer la galerie photo",
+    "prevPhoto": "Photo précédente",
+    "nextPhoto": "Photo suivante"
+  },
+  "map": {
+    "viewOnGoogleMaps": "Voir sur Google Maps",
+    "loadingMap": "Chargement de la carte interactive..."
+  },
+  "sidebar": {
+    "chatWhatsApp": "Discuter sur WhatsApp",
+    "callAgent": "Appeler l'agent"
+  },
+  "notFound": {
+    "title": "Propriété Non Trouvée",
+    "description": "La propriété que vous recherchez a peut-être été vendue, louée ou le lien est incorrect.",
+    "backHome": "Retour aux Propriétés"
+  },
+  "error": {
+    "title": "Une erreur est survenue",
+    "description": "Impossible de charger les propriétés. Veuillez réessayer.",
+    "retry": "Réessayer"
   },
   "pagination": {
     "showing": "Affichage de {from}–{to} sur {total} propriétés",

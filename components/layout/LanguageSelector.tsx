@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation, LOCALES_INFO, SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
+import { FlagIcon } from '@/components/ui/FlagIcon';
 
 interface LanguageSelectorProps {
   variant?: 'dropdown' | 'mobile';
@@ -18,7 +19,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const currentInfo = LOCALES_INFO[locale] || LOCALES_INFO.es;
 
-  // Close dropdown on click outside
+  // Close dropdown on click outside or ESC
   useEffect(() => {
     if (!isOpen) return;
 
@@ -64,15 +65,18 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 key={code}
                 type="button"
                 onClick={() => handleSelect(code)}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
                   isSelected
                     ? 'bg-white text-nordic-dark shadow-sm font-semibold'
                     : 'text-nordic-muted hover:text-nordic-dark'
                 }`}
                 aria-pressed={isSelected}
               >
-                <span>{info.flag}</span>
-                <span>{info.nativeName}</span>
+                <FlagIcon locale={code} size="sm" />
+                <span className="text-xs" role="img" aria-label={info.name}>
+                  {info.flag}
+                </span>
+                <span className="truncate">{info.nativeName}</span>
               </button>
             );
           })}
@@ -91,9 +95,13 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         aria-expanded={isOpen}
         aria-label={`${t('nav.language')}: ${currentInfo.nativeName}`}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-nordic-dark/10 hover:border-mosque/40 bg-white/70 hover:bg-white text-nordic-dark text-xs font-medium transition-all shadow-2xs hover:shadow-sm select-none cursor-pointer group"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-nordic-dark/10 hover:border-mosque/40 bg-white/80 hover:bg-white text-nordic-dark text-xs font-medium transition-all shadow-2xs hover:shadow-sm select-none cursor-pointer group"
       >
-        <span className="text-sm leading-none" role="img" aria-hidden="true">
+        <span className="material-icons text-base text-mosque group-hover:scale-110 transition-transform">
+          language
+        </span>
+        <FlagIcon locale={currentInfo.code} size="md" />
+        <span className="text-xs hidden sm:inline-block" role="img" aria-label={currentInfo.name}>
           {currentInfo.flag}
         </span>
         <span className="font-semibold uppercase tracking-wide text-nordic-dark/85 group-hover:text-mosque transition-colors">
@@ -113,10 +121,11 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         <div
           role="listbox"
           aria-labelledby="language-selector-button"
-          className="absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-soft border border-nordic-dark/10 py-1.5 z-50 animate-fade-in focus:outline-none"
+          className="absolute right-0 mt-2 w-52 rounded-xl bg-white shadow-soft border border-nordic-dark/10 py-1.5 z-50 animate-fade-in focus:outline-none"
         >
-          <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-nordic-muted border-b border-nordic-dark/5 mb-1">
-            {t('nav.language')}
+          <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-nordic-muted border-b border-nordic-dark/5 mb-1 flex items-center gap-1.5">
+            <span className="material-icons text-sm text-mosque">translate</span>
+            <span>{t('nav.language')}</span>
           </div>
           {SUPPORTED_LOCALES.map((code) => {
             const info = LOCALES_INFO[code];
@@ -134,15 +143,21 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     : 'text-nordic-dark/80 hover:bg-black/5 hover:text-nordic-dark'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-base" role="img" aria-hidden="true">
+                <div className="flex items-center gap-2.5">
+                  <FlagIcon locale={code} size="md" />
+                  <span className="text-sm" role="img" aria-label={info.name}>
                     {info.flag}
                   </span>
                   <span>{info.nativeName}</span>
                 </div>
-                {isSelected && (
-                  <span className="material-icons text-sm text-mosque">check</span>
-                )}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/5 text-nordic-muted">
+                    {code}
+                  </span>
+                  {isSelected && (
+                    <span className="material-icons text-sm text-mosque">check</span>
+                  )}
+                </div>
               </button>
             );
           })}

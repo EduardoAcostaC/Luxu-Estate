@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useTranslation } from '@/lib/i18n';
 
 interface PropertyMapProps {
   latitude: number;
@@ -17,6 +18,7 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
   title,
   address,
 }) => {
+  const { t } = useTranslation();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -91,9 +93,9 @@ export const PropertyMap: React.FC<PropertyMapProps> = ({
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-2 right-2 z-[400] bg-white/90 hover:bg-white text-xs font-semibold px-3 py-1.5 rounded-md shadow-md text-nordic-dark hover:text-mosque transition-all backdrop-blur-sm"
+        className="absolute bottom-2 right-2 z-[400] bg-white/90 hover:bg-white text-xs font-semibold px-3 py-1.5 rounded-md shadow-md text-nordic-dark hover:text-mosque transition-all backdrop-blur-sm cursor-pointer"
       >
-        View on Google Maps
+        {t('map.viewOnGoogleMaps')}
       </a>
     </div>
   );

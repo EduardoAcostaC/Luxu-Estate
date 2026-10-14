@@ -53,3 +53,36 @@ export function translate(
   // Graceful fallback to key name
   return key;
 }
+
+/**
+ * Translates property badges/tags such as "New Arrival", "Exclusive", etc.
+ */
+export function translateTag(
+  tag: string | undefined,
+  t: (key: string, params?: TranslationParams) => string
+): string | undefined {
+  if (!tag) return undefined;
+  const normalized = tag.trim().toUpperCase();
+  if (normalized === 'EXCLUSIVE') return t('tags.exclusive');
+  if (normalized === 'NEW ARRIVAL') return t('tags.newArrival');
+  if (normalized === 'NEW LISTING') return t('tags.newListing');
+  if (normalized === 'NEW') return t('tags.new');
+  if (normalized === 'POPULAR') return t('tags.popular');
+  if (normalized === 'LUXURY') return t('tags.luxury');
+  return tag;
+}
+
+/**
+ * Translates recurring price periods, e.g. "/mo" -> "/mes" (es), "/mo" (en), "/mois" (fr).
+ */
+export function translatePricePeriod(
+  period: string | undefined,
+  t: (key: string, params?: TranslationParams) => string
+): string | undefined {
+  if (!period) return undefined;
+  const clean = period.trim().toLowerCase();
+  if (clean === '/mo' || clean === '/month' || clean === '/mes' || clean === '/mois') {
+    return t('propertyDetail.perMonth');
+  }
+  return period;
+}
