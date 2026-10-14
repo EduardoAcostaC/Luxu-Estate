@@ -13,8 +13,9 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ properties }) 
   const { savedIds, isSaved, toggleSave, view } = useSavedHomes();
 
   const visible = view === 'saved' ? properties.filter((p) => savedIds.includes(p.id)) : properties;
+  const displayProperties = visible.slice(0, 2);
 
-  if (visible.length === 0) return null;
+  if (displayProperties.length === 0) return null;
 
   return (
     <section className="mb-16">
@@ -36,7 +37,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ properties }) 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {visible.map((property) => (
+        {displayProperties.map((property) => (
           <FeaturedPropertyCard
             key={property.id}
             property={property}

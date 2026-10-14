@@ -209,7 +209,7 @@ export async function getMarketProperties(filters: HomeFilters): Promise<MarketP
   };
 }
 
-/** Featured collections (not paginated). */
+/** Featured collections (not paginated, limited to at most 2). */
 export async function getFeaturedProperties(filters: FilterArgs): Promise<Property[]> {
   'use cache';
   cacheLife('minutes');
@@ -222,12 +222,13 @@ export async function getFeaturedProperties(filters: FilterArgs): Promise<Proper
       .select('*')
       .eq('is_featured', true)
       .order('created_at', { ascending: false })
-      .order('id', { ascending: true }),
+      .order('id', { ascending: true })
+      .limit(2),
     filters
   );
 
   if (error) throw new Error(`Failed to load featured properties: ${error.message}`);
-  return (data ?? []).map(rowToProperty);
+  return (data ?? []).slice(0, 2).map(rowToProperty);
 }
 
 /** Detailed single property fetched by slug with 1-to-N image collection. */
