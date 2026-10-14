@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { PropertyDetail } from '@/types/property';
 import { useSavedHomes } from '@/components/home/SavedHomesProvider';
+import { useTranslation } from '@/lib/i18n';
 import { PropertyMapWrapper } from './PropertyMapWrapper';
 import { ScheduleVisitModal } from './ScheduleVisitModal';
 
@@ -12,14 +13,19 @@ interface PropertySidebarProps {
 }
 
 export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) => {
+  const { t } = useTranslation();
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const { isSaved, toggleSave } = useSavedHomes();
   const saved = isSaved(property.id);
 
-  // WhatsApp pre-filled message URL
-  const whatsappMessage = encodeURIComponent(
-    `Hello Sarah, I am interested in "${property.title}" (${property.priceFormatted}) located in ${property.location}. Could you share more information? Ref: ${property.slug}`
-  );
+  // WhatsApp pre-filled message URL localized
+  const rawMessage = t('propertyDetail.whatsappInterest', {
+    title: property.title,
+    price: property.priceFormatted,
+    location: property.location,
+    slug: property.slug,
+  });
+  const whatsappMessage = encodeURIComponent(rawMessage);
   const whatsappUrl = `https://wa.me/15552345678?text=${whatsappMessage}`;
 
   return (
@@ -47,7 +53,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
             {/* Favorite / Save Toggle */}
             <button
               type="button"
-              aria-label={saved ? 'Remove from saved' : 'Save property'}
+              aria-label={saved ? t('propertyDetail.removePropertyAria') : t('propertyDetail.savePropertyAria')}
               onClick={() => toggleSave(property.id)}
               className={`p-2.5 rounded-full border transition-all ${
                 saved
@@ -80,7 +86,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
               </h3>
               <div className="flex items-center gap-1 text-xs text-mosque font-medium">
                 <span className="material-icons text-[14px]">star</span>
-                <span>{property.agentTitle}</span>
+                <span>{property.agentTitle || t('propertyDetail.topRatedAgent')}</span>
               </div>
             </div>
 
@@ -117,7 +123,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
               <span className="material-icons text-xl group-hover:scale-110 transition-transform">
                 calendar_today
               </span>
-              Schedule Visit
+              {t('propertyDetail.scheduleVisit')}
             </button>
 
             <a
@@ -127,7 +133,7 @@ export const PropertySidebar: React.FC<PropertySidebarProps> = ({ property }) =>
               className="w-full bg-transparent border border-nordic-dark/15 hover:border-mosque text-nordic-dark/85 hover:text-mosque py-3.5 px-6 rounded-lg font-medium transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
             >
               <span className="material-icons text-xl text-mosque">chat</span>
-              Contact via WhatsApp
+              {t('propertyDetail.contactWhatsApp')}
             </a>
           </div>
         </div>

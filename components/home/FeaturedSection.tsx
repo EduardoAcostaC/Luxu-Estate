@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Property } from '@/types/property';
+import { useTranslation } from '@/lib/i18n';
 import { FeaturedPropertyCard } from './FeaturedPropertyCard';
 import { useSavedHomes } from './SavedHomesProvider';
 
@@ -11,6 +12,7 @@ interface FeaturedSectionProps {
 
 export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ properties }) => {
   const { savedIds, isSaved, toggleSave, view } = useSavedHomes();
+  const { t } = useTranslation();
 
   const visible = view === 'saved' ? properties.filter((p) => savedIds.includes(p.id)) : properties;
   const displayProperties = visible.slice(0, 2);
@@ -22,17 +24,17 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ properties }) 
       <div className="flex items-end justify-between mb-8">
         <div>
           <h2 className="text-2xl font-light text-nordic-dark">
-            Featured Collections
+            {t('featured.title')}
           </h2>
           <p className="text-nordic-muted mt-1 text-sm">
-            Curated properties for the discerning eye.
+            {t('featured.subtitle')}
           </p>
         </div>
         <a
           href="#market"
           className="hidden sm:flex items-center gap-1 text-sm font-medium text-mosque hover:opacity-70 transition-opacity"
         >
-          View all <span className="material-icons text-sm">arrow_forward</span>
+          {t('featured.viewAll')} <span className="material-icons text-sm">arrow_forward</span>
         </a>
       </div>
 

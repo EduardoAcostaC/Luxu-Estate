@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Property } from '@/types/property';
+import { useTranslation } from '@/lib/i18n';
 
 interface FeaturedPropertyCardProps {
   property: Property;
@@ -16,6 +17,7 @@ export const FeaturedPropertyCard: React.FC<FeaturedPropertyCardProps> = ({
   isSaved = false,
   onToggleSave,
 }) => {
+  const { t } = useTranslation();
   const [saved, setSaved] = useState(isSaved);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -26,6 +28,14 @@ export const FeaturedPropertyCard: React.FC<FeaturedPropertyCardProps> = ({
       onToggleSave(property.id);
     }
   };
+
+  const tagLabel = property.tag
+    ? property.tag.toUpperCase() === 'EXCLUSIVE'
+      ? t('featured.exclusive')
+      : property.tag.toUpperCase() === 'NEW LISTING'
+        ? t('featured.newListing')
+        : property.tag
+    : null;
 
   return (
     <Link
@@ -44,16 +54,16 @@ export const FeaturedPropertyCard: React.FC<FeaturedPropertyCardProps> = ({
           />
 
           {/* Tag Badge */}
-          {property.tag && (
+          {tagLabel && (
             <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-nordic-dark shadow-sm z-10">
-              {property.tag}
+              {tagLabel}
             </div>
           )}
 
           {/* Favorite Button */}
           <button
             type="button"
-            aria-label={saved ? 'Remove from saved' : 'Save property'}
+            aria-label={saved ? t('propertyDetail.removePropertyAria') : t('propertyDetail.savePropertyAria')}
             onClick={handleFavoriteClick}
             className={`absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center transition-all z-10 ${
               saved
@@ -89,10 +99,10 @@ export const FeaturedPropertyCard: React.FC<FeaturedPropertyCardProps> = ({
           {/* Spec Icons */}
           <div className="flex items-center gap-6 mt-6 pt-6 border-t border-nordic-dark/5">
             <div className="flex items-center gap-2 text-nordic-muted text-sm">
-              <span className="material-icons text-lg">king_bed</span> {property.beds} Beds
+              <span className="material-icons text-lg">king_bed</span> {t('propertyDetail.bedsCount', { count: property.beds })}
             </div>
             <div className="flex items-center gap-2 text-nordic-muted text-sm">
-              <span className="material-icons text-lg">bathtub</span> {property.baths} Baths
+              <span className="material-icons text-lg">bathtub</span> {t('propertyDetail.bathsCount', { count: property.baths })}
             </div>
             <div className="flex items-center gap-2 text-nordic-muted text-sm">
               <span className="material-icons text-lg">square_foot</span> {property.area}

@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useId } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 interface MortgageCalculatorProps {
   price: number;
 }
 
 export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
   const [interestRate, setInterestRate] = useState(6.5);
@@ -48,14 +50,14 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
           </div>
           <div>
             <h3 className="font-semibold text-nordic-dark text-base sm:text-lg">
-              Estimated Payment
+              {t('propertyDetail.estimatedPayment')}
             </h3>
             <p className="text-sm text-nordic-dark/70">
-              Starting from{' '}
+              {t('propertyDetail.startingFrom')}{' '}
               <strong className="text-mosque font-bold">
-                {currencyFormatter.format(totalMonthlyPayment)}/mo
+                {currencyFormatter.format(totalMonthlyPayment)}{t('propertyDetail.perMonth')}
               </strong>{' '}
-              with {downPaymentPercent}% down
+              {t('propertyDetail.withDown', { down: downPaymentPercent })}
             </p>
           </div>
         </div>
@@ -65,7 +67,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
           onClick={() => setIsOpen(!isOpen)}
           className="whitespace-nowrap px-4 py-2 bg-white border border-nordic-dark/15 rounded-lg text-sm font-semibold hover:border-mosque hover:text-mosque transition-all text-nordic-dark shadow-sm cursor-pointer"
         >
-          {isOpen ? 'Close Calculator' : 'Calculate Mortgage'}
+          {isOpen ? t('propertyDetail.readLess') : t('propertyDetail.estimatedPayment')}
         </button>
       </div>
 
@@ -76,7 +78,9 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
             {/* Down Payment Slider */}
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-semibold text-nordic-dark">
-                <label htmlFor={downPaymentSliderId}>Down Payment ({downPaymentPercent}%)</label>
+                <label htmlFor={downPaymentSliderId}>
+                  {t('propertyDetail.downPayment')} ({downPaymentPercent}%)
+                </label>
                 <span className="text-mosque">{currencyFormatter.format(downPaymentAmount)}</span>
               </div>
               <input
@@ -99,7 +103,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
             {/* Interest Rate Slider */}
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-semibold text-nordic-dark">
-                <label htmlFor={interestRateSliderId}>Interest Rate</label>
+                <label htmlFor={interestRateSliderId}>{t('propertyDetail.interestRate')}</label>
                 <span className="text-mosque">{interestRate.toFixed(1)}%</span>
               </div>
               <input
@@ -121,7 +125,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
 
             {/* Loan Term Toggle */}
             <div className="space-y-2">
-              <div className="text-xs font-semibold text-nordic-dark">Loan Term</div>
+              <div className="text-xs font-semibold text-nordic-dark">{t('propertyDetail.loanTerm')}</div>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -132,7 +136,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
                       : 'bg-white text-nordic-dark border-slate-200 hover:border-mosque'
                   }`}
                 >
-                  30 Years
+                  30 {t('propertyDetail.years')}
                 </button>
                 <button
                   type="button"
@@ -143,7 +147,7 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
                       : 'bg-white text-nordic-dark border-slate-200 hover:border-mosque'
                   }`}
                 >
-                  15 Years
+                  15 {t('propertyDetail.years')}
                 </button>
               </div>
             </div>
@@ -152,27 +156,27 @@ export const MortgageCalculator: React.FC<MortgageCalculatorProps> = ({ price })
           {/* Breakdown summary */}
           <div className="bg-white p-4 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs">
             <div>
-              <span className="text-nordic-muted block">Principal & Interest:</span>
+              <span className="text-nordic-muted block">{t('propertyDetail.principalAndInterest')}:</span>
               <strong className="text-sm text-nordic-dark">
-                {currencyFormatter.format(Math.round(monthlyPrincipalAndInterest))}/mo
+                {currencyFormatter.format(Math.round(monthlyPrincipalAndInterest))}{t('propertyDetail.perMonth')}
               </strong>
             </div>
             <div>
-              <span className="text-nordic-muted block">Taxes & Insurance (est.):</span>
+              <span className="text-nordic-muted block">{t('propertyDetail.taxesAndInsurance')}:</span>
               <strong className="text-sm text-nordic-dark">
-                {currencyFormatter.format(Math.round(monthlyTaxesAndInsurance))}/mo
+                {currencyFormatter.format(Math.round(monthlyTaxesAndInsurance))}{t('propertyDetail.perMonth')}
               </strong>
             </div>
             <div>
-              <span className="text-nordic-muted block">Loan Amount:</span>
+              <span className="text-nordic-muted block">{t('propertyDetail.homePrice')}:</span>
               <strong className="text-sm text-nordic-dark">
                 {currencyFormatter.format(principal)}
               </strong>
             </div>
             <div className="text-right ml-auto">
-              <span className="text-nordic-muted block">Total Monthly Estimate:</span>
+              <span className="text-nordic-muted block">{t('propertyDetail.monthlyTotal')}:</span>
               <strong className="text-base text-mosque font-bold">
-                {currencyFormatter.format(totalMonthlyPayment)}/mo
+                {currencyFormatter.format(totalMonthlyPayment)}{t('propertyDetail.perMonth')}
               </strong>
             </div>
           </div>

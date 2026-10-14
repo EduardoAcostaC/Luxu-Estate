@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { SavedHomesProvider } from '@/components/home/SavedHomesProvider';
+import { LanguageProvider } from '@/lib/i18n';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -18,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light" style={{ colorScheme: 'light' }}>
+    <html lang="es" className="light" style={{ colorScheme: 'light' }}>
       <head>
         <meta name="color-scheme" content="light" />
         <link
@@ -44,9 +45,11 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white min-h-screen">
-        <SavedHomesProvider>
-          {children}
-        </SavedHomesProvider>
+        <LanguageProvider>
+          <SavedHomesProvider>
+            {children}
+          </SavedHomesProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

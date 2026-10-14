@@ -9,6 +9,7 @@ import {
   type HomeFilters,
 } from '@/lib/home-params';
 import type { CategoryFilter } from '@/types/property';
+import { useTranslation } from '@/lib/i18n';
 
 interface FiltersModalProps {
   isOpen: boolean;
@@ -59,6 +60,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
 }) => {
   const router = useRouter();
   const locationInputId = useId();
+  const { t } = useTranslation();
 
   // Local draft state initialized from current filters
   const [location, setLocation] = useState<string>(currentFilters.location || '');
@@ -200,12 +202,12 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
             id="filters-modal-title"
             className="text-2xl font-semibold tracking-tight text-gray-900"
           >
-            Filters
+            {t('filtersModal.title')}
           </h1>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close filters"
+            aria-label={t('filtersModal.close')}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 cursor-pointer"
           >
             <span className="material-icons">close</span>
@@ -220,7 +222,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
               htmlFor={locationInputId}
               className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"
             >
-              Location
+              {t('filtersModal.location')}
             </label>
             <div className="relative group">
               <span className="material-icons absolute left-4 top-3.5 text-gray-400 group-focus-within:text-primary transition-colors">
@@ -231,7 +233,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="City, neighborhood, or address"
+                placeholder={t('filtersModal.locationPlaceholder')}
                 className="w-full pl-12 pr-4 py-3 bg-background-light border-0 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary focus:bg-white transition-all shadow-sm outline-none"
               />
             </div>
@@ -241,11 +243,11 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
           <section>
             <div className="flex justify-between items-end mb-4">
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Price Range
+                {t('filtersModal.priceRange')}
               </label>
               <span className="text-sm font-medium text-primary">
                 {minPrice <= MIN_LIMIT && maxPrice >= MAX_LIMIT
-                  ? 'Any Price'
+                  ? t('filtersModal.any')
                   : `${formatCompactPrice(minPrice)} – ${
                       maxPrice >= MAX_LIMIT ? '$10M+' : formatCompactPrice(maxPrice)
                     }`}
@@ -297,7 +299,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-background-light p-3 rounded-lg border border-transparent focus-within:border-primary/30 transition-colors">
                 <label className="block text-[10px] text-gray-500 uppercase font-medium mb-1">
-                  Min Price
+                  {t('filtersModal.minPrice')}
                 </label>
                 <div className="flex items-center">
                   <span className="text-gray-400 mr-1">$</span>
@@ -317,7 +319,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
 
               <div className="bg-background-light p-3 rounded-lg border border-transparent focus-within:border-primary/30 transition-colors">
                 <label className="block text-[10px] text-gray-500 uppercase font-medium mb-1">
-                  Max Price
+                  {t('filtersModal.maxPrice')}
                 </label>
                 <div className="flex items-center">
                   <span className="text-gray-400 mr-1">$</span>
@@ -329,7 +331,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                       const val = parseNumberInput(e.target.value) ?? MAX_LIMIT;
                       setMaxPrice(Math.max(val, minPrice));
                     }}
-                    placeholder="Any"
+                    placeholder={t('filtersModal.any')}
                     className="w-full bg-transparent border-0 p-0 text-gray-900 font-medium focus:ring-0 text-sm outline-none"
                   />
                 </div>
@@ -342,7 +344,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
             {/* Property Type */}
             <div className="space-y-3">
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Property Type
+                {t('filtersModal.propertyType')}
               </label>
               <div className="relative">
                 <select
@@ -350,11 +352,11 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                   onChange={(e) => setPropertyType(e.target.value as CategoryFilter)}
                   className="w-full bg-background-light border-0 rounded-lg py-3 pl-4 pr-10 text-gray-900 appearance-none focus:ring-2 focus:ring-primary cursor-pointer outline-none font-medium text-sm"
                 >
-                  <option value="All">Any Type</option>
-                  <option value="House">House</option>
-                  <option value="Apartment">Apartment</option>
-                  <option value="Villa">Villa</option>
-                  <option value="Penthouse">Penthouse</option>
+                  <option value="All">{t('categories.All')}</option>
+                  <option value="House">{t('categories.House')}</option>
+                  <option value="Apartment">{t('categories.Apartment')}</option>
+                  <option value="Villa">{t('categories.Villa')}</option>
+                  <option value="Penthouse">{t('categories.Penthouse')}</option>
                 </select>
                 <span className="material-icons absolute right-3 top-3 text-gray-400 pointer-events-none">
                   expand_more
@@ -367,7 +369,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
               {/* Beds */}
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-900">
-                  Bedrooms
+                  {t('filtersModal.bedrooms')}
                 </span>
                 <div className="flex items-center space-x-3 bg-background-light rounded-full p-1">
                   <button
@@ -379,7 +381,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                     <span className="material-icons text-base">remove</span>
                   </button>
                   <span className="text-sm font-semibold w-8 text-center text-gray-900">
-                    {beds === 0 ? 'Any' : `${beds}+`}
+                    {beds === 0 ? t('filtersModal.any') : `${beds}+`}
                   </span>
                   <button
                     type="button"
@@ -394,7 +396,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
               {/* Baths */}
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-900">
-                  Bathrooms
+                  {t('filtersModal.bathrooms')}
                 </span>
                 <div className="flex items-center space-x-3 bg-background-light rounded-full p-1">
                   <button
@@ -406,7 +408,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                     <span className="material-icons text-base">remove</span>
                   </button>
                   <span className="text-sm font-semibold w-8 text-center text-gray-900">
-                    {baths === 0 ? 'Any' : `${baths}+`}
+                    {baths === 0 ? t('filtersModal.any') : `${baths}+`}
                   </span>
                   <button
                     type="button"
@@ -423,7 +425,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
           {/* Section 4: Amenities */}
           <section>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              Amenities &amp; Features
+              {t('filtersModal.amenities')}
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {FILTER_AMENITIES.map((item) => {
@@ -448,7 +450,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                     >
                       {icon}
                     </span>
-                    <span>{item}</span>
+                    <span>{t(`amenities.${item}`)}</span>
                     {isActive && (
                       <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
                     )}
@@ -466,7 +468,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
             onClick={handleClear}
             className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors underline decoration-gray-300 underline-offset-4 cursor-pointer"
           >
-            Clear all filters
+            {t('filtersModal.resetAll')}
           </button>
 
           <button
@@ -475,10 +477,10 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
             className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-medium shadow-lg shadow-primary/30 transition-all hover:shadow-primary/40 flex items-center gap-2 transform active:scale-95 cursor-pointer"
           >
             {isLoadingCount
-              ? 'Updating...'
+              ? '...'
               : matchCount !== null
-              ? `Show ${matchCount} ${matchCount === 1 ? 'Home' : 'Homes'}`
-              : 'Show Homes'}
+              ? t('filtersModal.applyButton', { count: matchCount })
+              : t('filtersModal.applyButton', { count: 0 })}
             <span className="material-icons text-sm">arrow_forward</span>
           </button>
         </footer>

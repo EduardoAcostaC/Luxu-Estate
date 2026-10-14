@@ -1,6 +1,9 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { buildHomeHref, type HomeFilters } from '@/lib/home-params';
+import { useTranslation } from '@/lib/i18n';
 
 interface PaginationProps {
   filters: HomeFilters;
@@ -42,6 +45,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   total,
   pageSize,
 }) => {
+  const { t } = useTranslation();
+
   if (total === 0) return null;
 
   const from = (page - 1) * pageSize + 1;
@@ -51,13 +56,10 @@ export const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="mt-12 flex flex-col items-center gap-4">
       <p className="text-sm text-nordic-muted">
-        Showing <span className="font-medium text-nordic-dark">{from}–{to}</span> of{' '}
-        <span className="font-medium text-nordic-dark">{total}</span> properties
+        {t('pagination.showing', { from, to, total })}
       </p>
 
       {totalPages > 1 && (
-        // Desktop: [Anterior] [ 1 2 3 ] [Siguiente] with the numbers truly centred (1fr auto 1fr).
-        // Mobile: numbers on top, Anterior / Siguiente on a row below.
         <nav
           aria-label="Pagination"
           className="w-full grid grid-cols-2 sm:grid-cols-[1fr_auto_1fr] items-center gap-x-3 gap-y-3"
@@ -66,14 +68,14 @@ export const Pagination: React.FC<PaginationProps> = ({
             {page > 1 ? (
               <Link
                 href={hrefFor(page - 1)}
-                aria-label="Página anterior"
+                aria-label={t('pagination.prevAria')}
                 className={`${labelItem} ${enabledLabel}`}
               >
-                Anterior
+                {t('pagination.prev')}
               </Link>
             ) : (
               <span aria-disabled="true" className={`${labelItem} ${disabledLabel}`}>
-                Anterior
+                {t('pagination.prev')}
               </span>
             )}
           </div>
@@ -99,7 +101,7 @@ export const Pagination: React.FC<PaginationProps> = ({
                 <Link
                   key={item}
                   href={hrefFor(item)}
-                  aria-label={`Página ${item}`}
+                  aria-label={t('pagination.pageAria', { page: item })}
                   className={`${numberItem} bg-white border border-nordic-dark/5 text-nordic-muted hover:text-nordic-dark hover:border-mosque/50 hover:bg-mosque/5`}
                 >
                   {item}
@@ -112,14 +114,14 @@ export const Pagination: React.FC<PaginationProps> = ({
             {page < totalPages ? (
               <Link
                 href={hrefFor(page + 1)}
-                aria-label="Página siguiente"
+                aria-label={t('pagination.nextAria')}
                 className={`${labelItem} ${enabledLabel}`}
               >
-                Siguiente
+                {t('pagination.next')}
               </Link>
             ) : (
               <span aria-disabled="true" className={`${labelItem} ${disabledLabel}`}>
-                Siguiente
+                {t('pagination.next')}
               </span>
             )}
           </div>

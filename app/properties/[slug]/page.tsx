@@ -10,6 +10,8 @@ import { PropertyDescription } from '@/components/property/PropertyDescription';
 import { PropertyAmenities } from '@/components/property/PropertyAmenities';
 import { MortgageCalculator } from '@/components/property/MortgageCalculator';
 import { PropertySidebar } from '@/components/property/PropertySidebar';
+import { PropertyBreadcrumb } from '@/components/property/PropertyBreadcrumb';
+import { Footer } from '@/components/layout/Footer';
 
 interface PropertyPageProps {
   params: Promise<{ slug: string }>;
@@ -112,20 +114,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow">
         {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs text-nordic-muted flex items-center gap-2">
-          <Link href="/" className="hover:text-mosque transition-colors flex items-center gap-1">
-            <span className="material-icons text-sm">home</span>
-            Home
-          </Link>
-          <span className="text-slate-300">/</span>
-          <Link href="/" className="hover:text-mosque transition-colors">
-            Properties
-          </Link>
-          <span className="text-slate-300">/</span>
-          <span className="text-nordic-dark font-medium truncate max-w-xs sm:max-w-md">
-            {property.title}
-          </span>
-        </nav>
+        <PropertyBreadcrumb title={property.title} />
 
         {/* 2-Column Responsive Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
@@ -165,33 +154,7 @@ export default async function PropertyDetailPage({ params }: PropertyPageProps) 
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-12 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-nordic-dark flex items-center justify-center text-white shadow-sm">
-              <span className="material-icons text-white text-sm">apartment</span>
-            </div>
-            <span className="font-semibold text-sm text-nordic-dark tracking-tight">
-              LuxeEstate
-            </span>
-            <span className="text-xs text-nordic-muted ml-3">
-              &copy; 2026 LuxeEstate Inc. All rights reserved.
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6 text-xs text-nordic-muted">
-            <Link href="/" className="hover:text-mosque transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/" className="hover:text-mosque transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/" className="hover:text-mosque transition-colors">
-              Sitemap
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,6 +1,5 @@
-'use client';
-
 import React from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 interface FiltersToggleButtonProps {
   onClick: () => void;
@@ -11,6 +10,7 @@ export const FiltersToggleButton: React.FC<FiltersToggleButtonProps> = ({
   onClick,
   activeCount = 0,
 }) => {
+  const { t } = useTranslation();
   const hasActiveFilters = activeCount > 0;
 
   return (
@@ -24,7 +24,7 @@ export const FiltersToggleButton: React.FC<FiltersToggleButtonProps> = ({
       }`}
     >
       <span className="material-icons text-base">tune</span>
-      <span>Filters</span>
+      <span>{t('hero.filterButton')}</span>
       {hasActiveFilters && (
         <span className="ml-0.5 px-1.5 py-0.2 bg-white text-mosque rounded-full text-xs font-bold leading-tight">
           {activeCount}

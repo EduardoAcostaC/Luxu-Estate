@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Property } from '@/types/property';
+import { useTranslation } from '@/lib/i18n';
 
 interface PropertyCardProps {
   property: Property;
@@ -18,6 +19,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onToggleSave,
   className = '',
 }) => {
+  const { t } = useTranslation();
   const [saved, setSaved] = useState(isSaved);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -50,7 +52,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           {/* Favorite Button */}
           <button
             type="button"
-            aria-label={saved ? 'Remove from saved' : 'Save property'}
+            aria-label={saved ? t('propertyDetail.removePropertyAria') : t('propertyDetail.savePropertyAria')}
             onClick={handleFavoriteClick}
             className={`absolute top-3 right-3 p-2 rounded-full transition-colors z-10 ${
               saved
@@ -69,7 +71,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               isRent ? 'bg-mosque/90' : 'bg-nordic-dark/90'
             }`}
           >
-            {isRent ? 'FOR RENT' : 'FOR SALE'}
+            {isRent ? t('market.forRent') : t('market.forSale')}
           </div>
         </div>
 

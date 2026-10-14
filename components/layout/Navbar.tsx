@@ -11,14 +11,16 @@ import {
   type HomeFilters,
 } from '@/lib/home-params';
 import { useSavedHomes } from '@/components/home/SavedHomesProvider';
+import { useTranslation } from '@/lib/i18n';
+import { LanguageSelector } from './LanguageSelector';
 
 interface NavbarProps {
   /** Current URL filters (Buy/Rent tabs keep category and search). */
   filters?: HomeFilters;
 }
 
-type NavTab = 'Buy' | 'Rent' | 'Sell' | 'Saved Homes';
-const NAV_LINKS: NavTab[] = ['Buy', 'Rent', 'Sell', 'Saved Homes'];
+type NavKey = 'buy' | 'rent' | 'sell' | 'savedHomes';
+const NAV_KEYS: NavKey[] = ['buy', 'rent', 'sell', 'savedHomes'];
 
 /** Reads the URL filters on the client; must be rendered inside <Suspense>. */
 export const NavbarWithSearchParams: React.FC = () => {
@@ -30,33 +32,43 @@ export const NavbarWithSearchParams: React.FC = () => {
 export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { savedIds, view, setView } = useSavedHomes();
+  const { t } = useTranslation();
   const savedCount = savedIds.length;
 
-  const navLinks = NAV_LINKS;
-  const activeTab: NavTab =
-    view === 'saved' ? 'Saved Homes' : filters.listing === 'rent' ? 'Rent' : 'Buy';
+  const activeTab: NavKey =
+    view === 'saved' ? 'savedHomes' : filters.listing === 'rent' ? 'rent' : 'buy';
 
-  const hrefFor = (tab: NavTab): string | null => {
-    if (tab === 'Buy') return buildHomeHref(filters, { listing: 'all' });
-    if (tab === 'Rent') return buildHomeHref(filters, { listing: 'rent' });
+  const hrefFor = (tabKey: NavKey): string | null => {
+    if (tabKey === 'buy') return buildHomeHref(filters, { listing: 'all' });
+    if (tabKey === 'rent') return buildHomeHref(filters, { listing: 'rent' });
     return null;
   };
 
-  const handleTabClick = (tab: NavTab) => {
-    if (tab === 'Saved Homes') setView('saved');
-    else if (tab === 'Buy' || tab === 'Rent') setView('browse');
+  const handleTabClick = (tabKey: NavKey) => {
+    if (tabKey === 'savedHomes') setView('saved');
+    else if (tabKey === 'buy' || tabKey === 'rent') setView('browse');
     setMobileMenuOpen(false);
   };
 
-  const renderTab = (tab: NavTab, className: string, children: React.ReactNode) => {
-    const href = hrefFor(tab);
+  const renderTab = (tabKey: NavKey, className: string, label: string) => {
+    const href = hrefFor(tabKey);
     return href ? (
-      <Link key={tab} href={href} onClick={() => handleTabClick(tab)} className={className}>
-        {children}
+      <Link key={tabKey} href={href} onClick={() => handleTabClick(tabKey)} className={className}>
+        {label}
+        {tabKey === 'savedHomes' && savedCount > 0 && (
+          <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-mosque/10 text-mosque font-semibold">
+            {savedCount}
+          </span>
+        )}
       </Link>
     ) : (
-      <button key={tab} type="button" onClick={() => handleTabClick(tab)} className={className}>
-        {children}
+      <button key={tabKey} type="button" onClick={() => handleTabClick(tabKey)} className={className}>
+        {label}
+        {tabKey === 'savedHomes' && savedCount > 0 && (
+          <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-mosque/10 text-mosque font-semibold">
+            {savedCount}
+          </span>
+        )}
       </button>
     );
   };
@@ -81,38 +93,35 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((tab) => {
-              const isActive = activeTab === tab;
+            {NAV_KEYS.map((tabKey) => {
+              const isActive = activeTab === tabKey;
+              const label = t(`nav.${tabKey}`);
               return renderTab(
-                tab,
+                tabKey,
                 `font-medium text-sm px-1 py-1 transition-all ${
                   isActive
                     ? 'text-mosque border-b-2 border-mosque'
                     : 'text-nordic-dark/70 hover:text-nordic-dark hover:border-b-2 hover:border-nordic-dark/20'
                 }`,
-                <>
-                  {tab}
-                  {tab === 'Saved Homes' && savedCount > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-mosque/10 text-mosque font-semibold">
-                      {savedCount}
-                    </span>
-                  )}
-                </>
+                label
               );
             })}
           </div>
 
           {/* Right Action Icons & Profile */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-4 sm:space-x-5">
+            {/* Language Selector (Desktop) */}
+            <LanguageSelector variant="dropdown" />
+
             <button
-              aria-label="Search"
+              aria-label={t('nav.searchAria')}
               className="text-nordic-dark hover:text-mosque transition-colors"
             >
               <span className="material-icons">search</span>
             </button>
 
             <button
-              aria-label="Notifications"
+              aria-label={t('nav.notificationsAria')}
               className="text-nordic-dark hover:text-mosque transition-colors relative"
             >
               <span className="material-icons">notifications_none</span>
@@ -120,8 +129,8 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
             </button>
 
             <button
-              aria-label="User Profile"
-              className="flex items-center gap-2 pl-2 border-l border-nordic-dark/10 ml-2"
+              aria-label={t('nav.profileAria')}
+              className="flex items-center gap-2 pl-2 border-l border-nordic-dark/10"
             >
               <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent hover:ring-mosque transition-all relative">
                 <Image
@@ -137,7 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
 
             {/* Mobile menu toggle */}
             <button
-              aria-label="Toggle mobile menu"
+              aria-label={t('nav.toggleMenuAria')}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden text-nordic-dark hover:text-mosque p-1 rounded-lg"
             >
@@ -152,20 +161,25 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
       {/* Mobile Menu Dropdown */}
       <div
         className={`md:hidden border-t border-nordic-dark/5 bg-background-light overflow-hidden transition-all duration-300 ${
-          mobileMenuOpen ? 'max-h-60 opacity-100 py-2' : 'max-h-0 opacity-0 py-0'
+          mobileMenuOpen ? 'max-h-96 opacity-100 py-3' : 'max-h-0 opacity-0 py-0'
         }`}
       >
         <div className="px-4 space-y-1">
-          {navLinks.map((tab) => {
-            const isActive = activeTab === tab;
+          {NAV_KEYS.map((tabKey) => {
+            const isActive = activeTab === tabKey;
+            const label = t(`nav.${tabKey}`);
             return renderTab(
-              tab,
+              tabKey,
               `block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors ${
                 isActive ? 'text-mosque bg-mosque/10' : 'text-nordic-dark hover:bg-black/5'
               }`,
-              tab
+              label
             );
           })}
+
+          <div className="pt-3 border-t border-nordic-dark/10 mt-2">
+            <LanguageSelector variant="mobile" />
+          </div>
         </div>
       </div>
     </nav>
