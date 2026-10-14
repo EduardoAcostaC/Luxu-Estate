@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { SavedHomesProvider } from '@/components/home/SavedHomesProvider';
 import { LanguageProvider } from '@/lib/i18n';
+import { AuthProvider } from '@/lib/auth/AuthProvider';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -43,12 +44,18 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="bg-background-light text-nordic-dark font-display antialiased selection:bg-mosque selection:text-white min-h-screen">
         <LanguageProvider>
-          <SavedHomesProvider>
-            {children}
-          </SavedHomesProvider>
+          <AuthProvider>
+            <SavedHomesProvider>
+              {children}
+            </SavedHomesProvider>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

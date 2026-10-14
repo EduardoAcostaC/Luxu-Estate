@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -12,6 +12,7 @@ import {
 } from '@/lib/home-params';
 import { useSavedHomes } from '@/components/home/SavedHomesProvider';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { LanguageSelector } from './LanguageSelector';
 
 interface NavbarProps {
@@ -31,9 +32,32 @@ export const NavbarWithSearchParams: React.FC = () => {
 
 export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
   const { savedIds, view, setView } = useSavedHomes();
   const { t } = useTranslation();
+  const { user, avatarUrl, userName, userEmail, provider, signOut, loading } = useAuth();
   const savedCount = savedIds.length;
+
+  // Close dropdown menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    if (profileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileMenuOpen]);
 
   const activeTab: NavKey =
     view === 'saved' ? 'savedHomes' : filters.listing === 'rent' ? 'rent' : 'buy';
@@ -48,6 +72,12 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
     if (tabKey === 'savedHomes') setView('saved');
     else if (tabKey === 'buy' || tabKey === 'rent') setView('browse');
     setMobileMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    setProfileMenuOpen(false);
+    setMobileMenuOpen(false);
+    await signOut();
   };
 
   const renderTab = (tabKey: NavKey, className: string, label: string) => {
@@ -128,21 +158,120 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
               <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-background-light"></span>
             </button>
 
-            <button
-              aria-label={t('nav.profileAria')}
-              className="flex items-center gap-2 pl-2 border-l border-nordic-dark/10"
-            >
-              <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent hover:ring-mosque transition-all relative">
-                <Image
-                  alt="Profile"
-                  width={36}
-                  height={36}
-                  unoptimized
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAWhQZ663Bd08kmzjbOPmUk4UIxYooNONShMEFXLR-DtmVi6Oz-TiaY77SPwFk7g0OobkeZEOMvt6v29mSOD0Xm2g95WbBG3ZjWXmiABOUwGU0LOySRfVDo-JTXQ0-gtwjWxbmue0qDm91m-zEOEZwAW6iRFB1qC1bAU-wkjxm67Sbztq8w7srHkFT9bVEC86qG-FzhOBTomhAurNRmx9l8Yfqabk328NfdKuVLckgCdaPsNFE3yN65MeoRi05GA_gXIMwG4YDIeA"
-                />
+            {/* Profile / Auth Section */}
+            {loading ? (
+              <div className="w-9 h-9 rounded-full bg-nordic-dark/10 animate-pulse" />
+            ) : user ? (
+              <div className="relative pl-2 border-l border-nordic-dark/10" ref={profileMenuRef}>
+                <button
+                  aria-label={t('nav.profileAria')}
+                  aria-expanded={profileMenuOpen}
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-mosque/40 transition-all cursor-pointer"
+                >
+                  <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent hover:ring-mosque transition-all relative flex items-center justify-center">
+                    {avatarUrl ? (
+                      <Image
+                        alt={userName || 'User avatar'}
+                        width={36}
+                        height={36}
+                        unoptimized
+                        className="w-full h-full object-cover"
+                        src={avatarUrl}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-mosque text-white font-semibold text-xs">
+                        {(userName || userEmail || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                </button>
+
+                {/* Dropdown Menu */}
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-soft-hover border border-nordic-dark/10 py-2 z-50 animate-in fade-in duration-150">
+                    {/* User Header */}
+                    <div className="px-4 py-3 border-b border-nordic-dark/10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden relative flex-shrink-0">
+                          {avatarUrl ? (
+                            <Image
+                              alt={userName || 'Avatar'}
+                              width={40}
+                              height={40}
+                              unoptimized
+                              className="w-full h-full object-cover"
+                              src={avatarUrl}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-mosque text-white font-semibold text-sm">
+                              {(userName || userEmail || 'U').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-nordic truncate">
+                            {userName}
+                          </p>
+                          <p className="text-xs text-nordic/60 truncate">
+                            {userEmail}
+                          </p>
+                        </div>
+                      </div>
+                      {provider && (
+                        <div className="mt-2.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-nordic/5 text-nordic/80 capitalize">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span>{provider}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="py-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setView('saved');
+                          setProfileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-nordic/80 hover:text-nordic hover:bg-black/5 transition-colors cursor-pointer text-left"
+                      >
+                        <span className="material-icons text-lg text-mosque">bookmark_border</span>
+                        <span>{t('nav.savedHomes')}</span>
+                        {savedCount > 0 && (
+                          <span className="ml-auto px-1.5 py-0.5 text-xs rounded-full bg-mosque/10 text-mosque font-semibold">
+                            {savedCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Sign Out */}
+                    <div className="pt-1 border-t border-nordic-dark/10">
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-500/10 transition-colors cursor-pointer text-left font-medium"
+                      >
+                        <span className="material-icons text-lg text-red-600">logout</span>
+                        <span>{t('nav.signOut')}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            </button>
+            ) : (
+              <div className="pl-2 border-l border-nordic-dark/10">
+                <Link
+                  href="/login"
+                  id="navbar-signin-btn"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-sm font-medium rounded-lg bg-mosque text-white hover:bg-primary-dark transition-all duration-200 shadow-sm hover:shadow-soft"
+                >
+                  <span className="material-icons text-base">login</span>
+                  <span>{t('nav.signIn')}</span>
+                </Link>
+              </div>
+            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -165,6 +294,42 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
         }`}
       >
         <div className="px-4 space-y-1">
+          {/* User profile banner in mobile */}
+          {user && (
+            <div className="mb-3 p-3 rounded-lg bg-black/5 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden relative flex-shrink-0">
+                  {avatarUrl ? (
+                    <Image
+                      alt={userName || 'Avatar'}
+                      width={32}
+                      height={32}
+                      unoptimized
+                      className="w-full h-full object-cover"
+                      src={avatarUrl}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-mosque text-white font-semibold text-xs">
+                      {(userName || userEmail || 'U').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-nordic truncate">{userName}</p>
+                  <p className="text-xs text-nordic/60 truncate">{userEmail}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                title={t('nav.signOut')}
+                className="text-red-600 hover:text-red-700 p-1"
+              >
+                <span className="material-icons text-xl">logout</span>
+              </button>
+            </div>
+          )}
+
           {NAV_KEYS.map((tabKey) => {
             const isActive = activeTab === tabKey;
             const label = t(`nav.${tabKey}`);
@@ -177,6 +342,16 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
             );
           })}
 
+          {!user && !loading && (
+            <Link
+              href="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-2 block w-full text-center px-4 py-2.5 rounded-lg bg-mosque text-white font-medium text-sm hover:bg-primary-dark transition-colors"
+            >
+              {t('nav.signIn')}
+            </Link>
+          )}
+
           <div className="pt-3 border-t border-nordic-dark/10 mt-2">
             <LanguageSelector variant="mobile" />
           </div>
@@ -185,3 +360,4 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
     </nav>
   );
 };
+

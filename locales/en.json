@@ -8,7 +8,26 @@
     "notificationsAria": "Notifications",
     "profileAria": "User profile",
     "toggleMenuAria": "Toggle mobile menu",
-    "language": "Language"
+    "language": "Language",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "myProfile": "My Account",
+    "welcomeUser": "Hello"
+  },
+  "auth": {
+    "welcome": "Welcome to LuxeEstate",
+    "subtitle": "Unlock exclusive properties worldwide.",
+    "continueGoogle": "Continue with Google",
+    "continueGithub": "Continue with GitHub",
+    "connectingGoogle": "Connecting to Google...",
+    "connectingGithub": "Connecting to GitHub...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "helpCenter": "Help Center",
+    "authErrorTitle": "Authentication error",
+    "backToHome": "Back to home"
   },
   "hero": {
     "titleStart": "Find your",

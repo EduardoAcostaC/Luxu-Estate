@@ -8,7 +8,26 @@
     "notificationsAria": "Notificaciones",
     "profileAria": "Perfil de usuario",
     "toggleMenuAria": "Abrir menú de navegación",
-    "language": "Idioma"
+    "language": "Idioma",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "myProfile": "Mi cuenta",
+    "welcomeUser": "Hola"
+  },
+  "auth": {
+    "welcome": "Bienvenido a LuxeEstate",
+    "subtitle": "Descubre propiedades exclusivas en todo el mundo.",
+    "continueGoogle": "Continuar con Google",
+    "continueGithub": "Continuar con GitHub",
+    "connectingGoogle": "Conectando con Google...",
+    "connectingGithub": "Conectando con GitHub...",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUp": "Regístrate",
+    "privacyPolicy": "Política de privacidad",
+    "termsOfService": "Términos del servicio",
+    "helpCenter": "Centro de ayuda",
+    "authErrorTitle": "Error de autenticación",
+    "backToHome": "Volver al inicio"
   },
   "hero": {
     "titleStart": "Encuentra tu",
