@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Property } from '@/types/property';
@@ -10,12 +10,30 @@ interface PropertiesManagerProps {
   initialProperties: Property[];
 }
 
+const PAGE_SIZE = 10;
+
+function getPageItems(page: number, totalPages: number): (number | null)[] {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  const items: (number | null)[] = [1];
+  const start = Math.max(2, page - 1);
+  const end = Math.min(totalPages - 1, page + 1);
+
+  if (start > 2) items.push(null);
+  for (let p = start; p <= end; p++) items.push(p);
+  if (end < totalPages - 1) items.push(null);
+  items.push(totalPages);
+  return items;
+}
+
 export function PropertiesManager({ initialProperties }: PropertiesManagerProps) {
   const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>(initialProperties);
   const [searchQuery, setSearchQuery] = useState('');
   const [listingFilter, setListingFilter] = useState<'all' | 'sale' | 'rent'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   // Stats calculation
   const totalListings = properties.length;
@@ -46,6 +64,36 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
       return matchesSearch && matchesListing;
     });
   }, [properties, searchQuery, listingFilter]);
+
+  // Pagination calculations
+  const totalFiltered = filteredProperties.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  const validPage = Math.min(Math.max(currentPage, 1), totalPages);
+
+  const paginatedProperties = useMemo(() => {
+    const startIndex = (validPage - 1) * PAGE_SIZE;
+    return filteredProperties.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredProperties, validPage]);
+
+  const from = totalFiltered === 0 ? 0 : (validPage - 1) * PAGE_SIZE + 1;
+  const to = Math.min(validPage * PAGE_SIZE, totalFiltered);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    if (listContainerRef.current) {
+      listContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleListingFilterChange = (filter: 'all' | 'sale' | 'rent') => {
+    setListingFilter(filter);
+    setCurrentPage(1);
+  };
 
   const handleDelete = (id: string, title: string) => {
     if (confirm(`¿Estás seguro de que deseas eliminar la propiedad "${title}"?`)) {
@@ -93,7 +141,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
         <div className="flex items-center gap-3">
           <div className="inline-flex rounded-lg border border-nordic-dark/15 p-1 bg-white shadow-2xs">
             <button
-              onClick={() => setListingFilter('all')}
+              onClick={() => handleListingFilterChange('all')}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 listingFilter === 'all'
                   ? 'bg-mosque text-white shadow-xs'
@@ -103,7 +151,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
               Todos
             </button>
             <button
-              onClick={() => setListingFilter('sale')}
+              onClick={() => handleListingFilterChange('sale')}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 listingFilter === 'sale'
                   ? 'bg-mosque text-white shadow-xs'
@@ -113,7 +161,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
               Venta
             </button>
             <button
-              onClick={() => setListingFilter('rent')}
+              onClick={() => handleListingFilterChange('rent')}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 listingFilter === 'rent'
                   ? 'bg-mosque text-white shadow-xs'
@@ -193,13 +241,13 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           placeholder={t('dashboard.searchPropertiesPlaceholder')}
           className="w-full pl-11 pr-4 py-3 bg-white rounded-xl border border-nordic-dark/15 text-sm text-nordic-dark focus:outline-none focus:ring-2 focus:ring-mosque/30 shadow-2xs placeholder-nordic-dark/40"
         />
         {searchQuery && (
           <button
-            onClick={() => setSearchQuery('')}
+            onClick={() => handleSearchChange('')}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-nordic-dark/40 hover:text-nordic-dark"
           >
             <span className="material-icons text-lg">close</span>
@@ -208,7 +256,10 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
       </div>
 
       {/* Property List Container */}
-      <div className="bg-white rounded-xl shadow-2xs border border-nordic-dark/10 overflow-hidden">
+      <div
+        ref={listContainerRef}
+        className="bg-white rounded-xl shadow-2xs border border-nordic-dark/10 overflow-hidden"
+      >
         {/* Table Header */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50/70 border-b border-nordic-dark/10 text-xs font-semibold text-nordic-dark/60 uppercase tracking-wider">
           <div className="col-span-6">{t('dashboard.propertyDetails')}</div>
@@ -232,7 +283,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
           </div>
         ) : (
           <div className="divide-y divide-nordic-dark/10">
-            {filteredProperties.map((prop) => (
+            {paginatedProperties.map((prop) => (
               <div
                 key={prop.id}
                 className="group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 hover:bg-background-light/60 transition-colors items-center"
@@ -335,6 +386,69 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalFiltered > 0 && (
+          <div className="px-6 py-4 border-t border-nordic-dark/10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50/60">
+            <div className="text-xs sm:text-sm text-nordic-dark/60 font-medium">
+              {t('pagination.showing', { from, to, total: totalFiltered })}
+            </div>
+
+            {totalPages > 1 && (
+              <nav aria-label="Pagination" className="flex items-center gap-1 sm:gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(validPage - 1)}
+                  disabled={validPage <= 1}
+                  className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-nordic-dark/15 text-xs font-medium text-nordic-dark hover:border-mosque hover:text-mosque disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-nordic-dark/15 disabled:hover:text-nordic-dark transition-colors bg-white shadow-2xs cursor-pointer"
+                  aria-label={t('pagination.prevAria')}
+                >
+                  <span className="material-icons text-base sm:mr-1">chevron_left</span>
+                  <span className="hidden sm:inline">{t('pagination.prev')}</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {getPageItems(validPage, totalPages).map((item, idx) =>
+                    item === null ? (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="w-8 h-8 flex items-center justify-center text-xs text-nordic-dark/40"
+                      >
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => handlePageChange(item)}
+                        className={`min-w-8 h-8 px-2 flex items-center justify-center rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                          item === validPage
+                            ? 'bg-mosque text-white shadow-xs'
+                            : 'bg-white border border-nordic-dark/15 text-nordic-dark/70 hover:text-nordic-dark hover:border-mosque/40'
+                        }`}
+                        aria-current={item === validPage ? 'page' : undefined}
+                        aria-label={t('pagination.pageAria', { page: item })}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(validPage + 1)}
+                  disabled={validPage >= totalPages}
+                  className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-nordic-dark/15 text-xs font-medium text-nordic-dark hover:border-mosque hover:text-mosque disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-nordic-dark/15 disabled:hover:text-nordic-dark transition-colors bg-white shadow-2xs cursor-pointer"
+                  aria-label={t('pagination.nextAria')}
+                >
+                  <span className="hidden sm:inline">{t('pagination.next')}</span>
+                  <span className="material-icons text-base sm:ml-1">chevron_right</span>
+                </button>
+              </nav>
+            )}
           </div>
         )}
       </div>
