@@ -93,3 +93,5 @@ export function useTranslation(): I18nContextType {
   }
   return context;
 }
+
+export const useLanguage = useTranslation;

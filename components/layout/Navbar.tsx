@@ -228,6 +228,15 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
 
                     {/* Menu Items */}
                     <div className="py-1">
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-nordic/80 hover:text-nordic hover:bg-black/5 transition-colors cursor-pointer text-left"
+                      >
+                        <span className="material-icons text-lg text-mosque">dashboard</span>
+                        <span>{t('dashboard.title')}</span>
+                      </Link>
+
                       <button
                         type="button"
                         onClick={() => {
@@ -341,6 +350,17 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
               label
             );
           })}
+
+          {user && (
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-mosque bg-mosque/5 hover:bg-mosque/10 transition-colors"
+            >
+              <span className="material-icons text-lg">dashboard</span>
+              <span>{t('dashboard.title')}</span>
+            </Link>
+          )}
 
           {!user && !loading && (
             <Link
