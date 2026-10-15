@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import { DashboardNavbar } from '@/components/dashboard/DashboardNavbar';
 import { getCurrentUserRole } from '@/lib/roles';
 
@@ -15,6 +16,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  await connection();
   const { role } = await getCurrentUserRole();
 
   return (

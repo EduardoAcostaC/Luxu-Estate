@@ -1,4 +1,5 @@
 import React from 'react';
+import { connection } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { PropertiesManager } from '@/components/dashboard/PropertiesManager';
 import type { Property } from '@/types/property';
@@ -12,6 +13,7 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 });
 
 export default async function DashboardPropertiesPage() {
+  await connection();
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from('properties')

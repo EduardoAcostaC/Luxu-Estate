@@ -2,6 +2,7 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { connection } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import type { Database, AppRole, UserRoleRow } from '@/lib/supabase/database.types';
 
@@ -43,6 +44,7 @@ export async function getCurrentUserRole(): Promise<{
   email: string | null;
 }> {
   try {
+    await connection();
     const supabase = await getSupabaseServerClient();
     const {
       data: { user },
