@@ -42,3 +42,16 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Leaflet marker & popup reset */
+.custom-luxe-marker.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(2px);
+}
+

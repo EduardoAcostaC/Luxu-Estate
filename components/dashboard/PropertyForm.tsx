@@ -2,10 +2,10 @@
 
 import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
 import { PropertyImageUploader } from './PropertyImageUploader';
+import { PropertyMapWrapper } from '@/components/property/PropertyMapWrapper';
 import {
   savePropertyAction,
   type PropertyFormData,
@@ -76,10 +76,14 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
   // Location
   const [location, setLocation] = useState(initialData?.location || '');
   const [latitude, setLatitude] = useState<number | string>(
-    initialData?.latitude ?? 34.07362
+    initialData?.latitude !== undefined && initialData?.latitude !== null
+      ? initialData.latitude
+      : ''
   );
   const [longitude, setLongitude] = useState<number | string>(
-    initialData?.longitude ?? -118.400356
+    initialData?.longitude !== undefined && initialData?.longitude !== null
+      ? initialData.longitude
+      : ''
   );
   const [showCoords, setShowCoords] = useState(true);
 
@@ -126,6 +130,36 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
       setDescription((prev) => `${prev} *texto en cursiva* `);
     } else if (type === 'list') {
       setDescription((prev) => `${prev}\n• Elemento de lista\n• Segundo elemento\n`);
+    }
+  };
+
+  const hasCoordinates =
+    latitude !== '' &&
+    longitude !== '' &&
+    !isNaN(Number(latitude)) &&
+    !isNaN(Number(longitude)) &&
+    Number(latitude) >= -90 &&
+    Number(latitude) <= 90 &&
+    Number(longitude) >= -180 &&
+    Number(longitude) <= 180;
+
+  const handleUseCurrentLocation = () => {
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setLatitude(Number(pos.coords.latitude.toFixed(6)));
+          setLongitude(Number(pos.coords.longitude.toFixed(6)));
+        },
+        (err) => {
+          console.warn('Geolocation unavailable, setting default location:', err);
+          setLatitude(34.07362);
+          setLongitude(-118.400356);
+        },
+        { enableHighAccuracy: true, timeout: 6000 }
+      );
+    } else {
+      setLatitude(34.07362);
+      setLongitude(-118.400356);
     }
   };
 
@@ -534,35 +568,102 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
                 />
               </div>
 
-              {/* Map Preview */}
-              <div className="relative h-48 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200 group">
-                <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS55FY7gfArnlTpNsdabJk9nBO5uQJgOwIsl8beO34JRZ9dMmjLoIkTuTUO72Y9L5tUmQqTReQWebUWadAWwLusGmRQiIict5sqY--yRaOxuYpTzfR4vv4RKh1ex6oxY64e0kbSeMudNO6pv-gG0WzVWs-pDfvQm5IoTQ1mT-tAV49LDkXAHZl317M1-D7eZw3N8o2ExKWTgg6oMAXOFVnkApIqnb7TZHekwSw8pWQxpJV2EKI8EQKQbQXJaSbjN8gB1n8b-ueWj8"
-                  alt="Map view preview"
-                  fill
-                  unoptimized
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500"
-                />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="bg-white/90 text-nordic px-3 py-1.5 rounded shadow-sm backdrop-blur-sm text-xs font-bold font-sf-pro flex items-center gap-1">
-                    <span className="material-icons text-sm text-mosque">map</span>
-                    {t('dashboard.form.mapPreview')}
-                  </span>
+              {/* Map Preview / Leaflet Map */}
+              {hasCoordinates ? (
+                <div className="space-y-2">
+                  <div className="relative h-60 w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm z-0">
+                    <PropertyMapWrapper
+                      latitude={Number(latitude)}
+                      longitude={Number(longitude)}
+                      title={title || t('dashboard.form.mapPreview')}
+                      address={location || t('dashboard.form.addressPlaceholder')}
+                      editable={true}
+                      onCoordinatesChange={(newLat, newLng) => {
+                        setLatitude(Number(newLat.toFixed(6)));
+                        setLongitude(Number(newLng.toFixed(6)));
+                      }}
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-gray-500 font-sf-pro px-0.5">
+                    <span className="flex items-center gap-1 text-nordic">
+                      <span className="material-icons text-mosque text-xs">touch_app</span>
+                      {t('dashboard.form.mapHelp')}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLatitude('');
+                        setLongitude('');
+                      }}
+                      className="text-red-500 hover:text-red-700 hover:underline cursor-pointer transition-colors"
+                    >
+                      {t('dashboard.form.clearCoordinates')}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="relative h-48 w-full rounded-lg overflow-hidden bg-slate-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-5 text-center transition-all">
+                  <div className="w-10 h-10 rounded-full bg-hint-green/50 flex items-center justify-center text-mosque mb-2 shadow-sm">
+                    <span className="material-icons text-xl">map</span>
+                  </div>
+                  <p className="text-xs font-semibold text-nordic mb-1 font-sf-pro">
+                    {t('dashboard.form.mapNoCoordsTitle')}
+                  </p>
+                  <p className="text-[11px] text-gray-500 max-w-xs mb-3 font-sf-pro leading-relaxed">
+                    {t('dashboard.form.mapNoCoordsSubtitle')}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleUseCurrentLocation}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-hint-green/20 border border-gray-200 hover:border-mosque text-nordic rounded-md text-xs font-medium shadow-sm transition-all cursor-pointer"
+                    >
+                      <span className="material-icons text-xs text-mosque">my_location</span>
+                      <span>{t('dashboard.form.useCurrentLocation')}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLatitude(34.07362);
+                        setLongitude(-118.400356);
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md text-xs font-medium transition-all cursor-pointer"
+                    >
+                      <span className="material-icons text-xs">place</span>
+                      <span>{t('dashboard.form.sampleCoordinates')}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Optional Coordinates Toggle */}
               <div>
-                <button
-                  type="button"
-                  onClick={() => setShowCoords(!showCoords)}
-                  className="text-xs text-nordic/70 hover:text-mosque font-medium flex items-center gap-1 cursor-pointer"
-                >
-                  <span className="material-icons text-sm">
-                    {showCoords ? 'expand_less' : 'expand_more'}
-                  </span>
-                  <span>{t('dashboard.form.coordinates')}</span>
-                </button>
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setShowCoords(!showCoords)}
+                    className="text-xs text-nordic/70 hover:text-mosque font-medium flex items-center gap-1 cursor-pointer"
+                  >
+                    <span className="material-icons text-sm">
+                      {showCoords ? 'expand_less' : 'expand_more'}
+                    </span>
+                    <span>{t('dashboard.form.coordinates')}</span>
+                  </button>
+
+                  {hasCoordinates && (
+                    <button
+                      type="button"
+                      onClick={handleUseCurrentLocation}
+                      className="text-[11px] text-mosque hover:underline flex items-center gap-1 cursor-pointer"
+                      title={t('dashboard.form.useCurrentLocation')}
+                    >
+                      <span className="material-icons text-xs">my_location</span>
+                      <span>{t('dashboard.form.useCurrentLocation')}</span>
+                    </button>
+                  )}
+                </div>
+
                 {showCoords && (
                   <div className="grid grid-cols-2 gap-3 mt-2 pt-2 border-t border-gray-100">
                     <div>
@@ -572,9 +673,10 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
                       <input
                         type="number"
                         step="any"
+                        placeholder="ej. 34.07362"
                         value={latitude}
                         onChange={(e) => setLatitude(e.target.value)}
-                        className="w-full px-3 py-1.5 text-xs rounded border border-gray-200"
+                        className="w-full px-3 py-1.5 text-xs rounded border border-gray-200 bg-white text-nordic focus:ring-1 focus:ring-mosque focus:border-mosque transition-all"
                       />
                     </div>
                     <div>
@@ -584,9 +686,10 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
                       <input
                         type="number"
                         step="any"
+                        placeholder="ej. -118.400356"
                         value={longitude}
                         onChange={(e) => setLongitude(e.target.value)}
-                        className="w-full px-3 py-1.5 text-xs rounded border border-gray-200"
+                        className="w-full px-3 py-1.5 text-xs rounded border border-gray-200 bg-white text-nordic focus:ring-1 focus:ring-mosque focus:border-mosque transition-all"
                       />
                     </div>
                   </div>
