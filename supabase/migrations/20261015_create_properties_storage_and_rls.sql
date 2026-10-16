@@ -164,3 +164,14 @@ CREATE POLICY "Authorized users can delete property images"
         )
         OR public.is_admin(auth.uid())
     );
+
+-- 5. Fixes after enabling RLS
+-- Public SELECT on storage objects (required by upload with upsert: true)
+DROP POLICY IF EXISTS "Public can view property images" ON storage.objects;
+CREATE POLICY "Public can view property images"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'properties');
+
+-- Remove insecure legacy anon write policies
+DROP POLICY IF EXISTS "Allow anon update" ON public.properties;
+DROP POLICY IF EXISTS "Allow anon insert" ON public.property_images;

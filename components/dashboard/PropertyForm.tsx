@@ -81,7 +81,7 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
   const [longitude, setLongitude] = useState<number | string>(
     initialData?.longitude ?? -118.400356
   );
-  const [showCoords, setShowCoords] = useState(false);
+  const [showCoords, setShowCoords] = useState(true);
 
   // Details
   const [areaM2, setAreaM2] = useState<number | string>(
