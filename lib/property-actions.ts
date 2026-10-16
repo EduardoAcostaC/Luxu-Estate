@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { connection } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import type { Database } from '@/lib/supabase/database.types';
 import { getCurrentUserRole } from '@/lib/roles';
 
@@ -30,6 +30,8 @@ export interface PropertyFormData {
   image_alt: string;
   tag?: string | null;
   is_featured?: boolean;
+  /** When omitted the current value is kept (new properties default to active). */
+  is_active?: boolean;
   description?: string | null;
   garage?: number | null;
   amenities?: string[] | null;
@@ -144,6 +146,7 @@ export async function savePropertyAction(
       image_alt: mainImageAlt,
       tag: data.tag?.trim() || null,
       is_featured: Boolean(data.is_featured),
+      ...(data.is_active !== undefined ? { is_active: Boolean(data.is_active) } : {}),
       description: data.description?.trim() || null,
       garage: Number(data.garage) || 0,
       amenities: data.amenities && data.amenities.length > 0 ? data.amenities : [],
@@ -211,6 +214,7 @@ export async function savePropertyAction(
     }
 
     // Revalidate relevant cached views
+    updateTag('properties');
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/properties');
     revalidatePath(`/dashboard/properties/${targetId}/edit`);
@@ -226,10 +230,13 @@ export async function savePropertyAction(
 }
 
 /**
- * Server action to delete a property and associated gallery images.
+ * Server action to activate or deactivate a property (soft delete).
+ * Properties are never removed from the database: inactive ones are hidden from the
+ * public site (home, search, detail) but remain visible in the admin panel.
  */
-export async function deletePropertyAction(
-  propertyId: string
+export async function setPropertyActiveAction(
+  propertyId: string,
+  isActive: boolean
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await connection();
@@ -237,30 +244,36 @@ export async function deletePropertyAction(
     if (!role || (role !== 'admin' && role !== 'broker' && role !== 'agent')) {
       return {
         success: false,
-        error: 'Unauthorized: Only agents, brokers, or administrators can delete properties.',
+        error: 'Unauthorized: Only agents, brokers, or administrators can change property status.',
       };
     }
 
     const supabase = await getSupabaseServerClient();
 
-    // Delete gallery images first
-    await supabase.from('property_images').delete().eq('property_id', propertyId);
+    const { data: updated, error } = await supabase
+      .from('properties')
+      .update({ is_active: isActive })
+      .eq('id', propertyId)
+      .select('id, slug')
+      .maybeSingle();
 
-    // Delete property
-    const { error } = await supabase.from('properties').delete().eq('id', propertyId);
     if (error) {
-      console.error('Error deleting property:', error.message);
+      console.error('Error updating property status:', error.message);
       return { success: false, error: error.message };
     }
+    if (!updated) {
+      return { success: false, error: 'Property not found or not allowed.' };
+    }
 
+    updateTag('properties');
     revalidatePath('/dashboard');
-    revalidatePath('/dashboard/properties');
     revalidatePath('/');
     revalidatePath('/properties');
+    if (updated.slug) revalidatePath(`/properties/${updated.slug}`);
 
     return { success: true };
   } catch (err) {
-    console.error('Unexpected error in deletePropertyAction:', err);
+    console.error('Unexpected error in setPropertyActiveAction:', err);
     return { success: false, error: (err as Error).message };
   }
 }

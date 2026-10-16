@@ -47,6 +47,9 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
   >(initialData?.propertyType || 'Apartment');
   const [tag, setTag] = useState(initialData?.tag || '');
   const [isFeatured, setIsFeatured] = useState(Boolean(initialData?.isFeatured));
+  const [isActive, setIsActive] = useState(
+    initialData ? initialData.isActive !== false : true
+  );
 
   // Description
   const [description, setDescription] = useState(initialData?.description || '');
@@ -195,6 +198,7 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
       image_alt: images[0]?.altText || title.trim(),
       tag: tag.trim() || null,
       is_featured: isDraft ? false : isFeatured,
+      is_active: isActive,
       description: description.trim() || null,
       garage: Number(parking),
       amenities,
@@ -476,6 +480,21 @@ export function PropertyForm({ mode, initialData }: PropertyFormProps) {
                   />
                   <span className="text-sm font-medium text-nordic font-sf-pro group-hover:text-mosque transition-colors">
                     {t('dashboard.form.featuredLabel')}
+                  </span>
+                </label>
+              </div>
+
+              {/* Active toggle (inactive properties are hidden from the public site) */}
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer group select-none">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="w-4 h-4 text-mosque border-gray-300 rounded focus:ring-mosque cursor-pointer"
+                  />
+                  <span className="text-sm font-medium text-nordic font-sf-pro group-hover:text-mosque transition-colors">
+                    {t('dashboard.form.activeLabel')}
                   </span>
                 </label>
               </div>

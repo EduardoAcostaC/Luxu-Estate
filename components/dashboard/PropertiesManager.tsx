@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Property } from '@/types/property';
 import { useLanguage } from '@/lib/i18n';
-import { deletePropertyAction } from '@/lib/property-actions';
+import { setPropertyActiveAction } from '@/lib/property-actions';
 
 interface PropertiesManagerProps {
   initialProperties: Property[];
@@ -32,6 +32,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
   const [properties, setProperties] = useState<Property[]>(initialProperties);
   const [searchQuery, setSearchQuery] = useState('');
   const [listingFilter, setListingFilter] = useState<'all' | 'sale' | 'rent'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -39,7 +40,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
 
   // Stats calculation
   const totalListings = properties.length;
-  const activeCount = properties.filter((p) => p.listingType === 'sale').length;
+  const activeCount = properties.filter((p) => p.isActive).length;
   const pendingCount = properties.filter((p) => p.listingType === 'rent').length;
   const totalValue = properties.reduce((acc, p) => acc + p.price, 0);
 
@@ -63,9 +64,13 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
       const matchesListing =
         listingFilter === 'all' || prop.listingType === listingFilter;
 
-      return matchesSearch && matchesListing;
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' ? prop.isActive : !prop.isActive);
+
+      return matchesSearch && matchesListing && matchesStatus;
     });
-  }, [properties, searchQuery, listingFilter]);
+  }, [properties, searchQuery, listingFilter, statusFilter]);
 
   // Pagination calculations
   const totalFiltered = filteredProperties.length;
@@ -97,15 +102,29 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
     setCurrentPage(1);
   };
 
-  const handleDelete = (id: string, title: string) => {
-    if (confirm(`¿Estás seguro de que deseas eliminar la propiedad "${title}"?`)) {
+  const handleStatusFilterChange = (filter: 'all' | 'active' | 'inactive') => {
+    setStatusFilter(filter);
+    setCurrentPage(1);
+  };
+
+  // Properties are never deleted: they are toggled between active and inactive.
+  const handleToggleActive = (prop: Property) => {
+    const nextActive = !prop.isActive;
+    const confirmKey = nextActive ? 'dashboard.activateConfirm' : 'dashboard.deactivateConfirm';
+    if (confirm(t(confirmKey, { title: prop.title }))) {
       startTransition(async () => {
-        const res = await deletePropertyAction(id);
+        const res = await setPropertyActiveAction(prop.id, nextActive);
         if (res.success) {
-          setProperties((prev) => prev.filter((p) => p.id !== id));
-          setFeedbackMessage(`Propiedad "${title}" eliminada con éxito.`);
+          setProperties((prev) =>
+            prev.map((p) => (p.id === prop.id ? { ...p, isActive: nextActive } : p))
+          );
+          setFeedbackMessage(
+            t(nextActive ? 'dashboard.activatedSuccess' : 'dashboard.deactivatedSuccess', {
+              title: prop.title,
+            })
+          );
         } else {
-          setFeedbackMessage(`Error al eliminar: ${res.error || 'Inténtalo de nuevo'}`);
+          setFeedbackMessage(`${t('dashboard.statusChangeError')}: ${res.error || ''}`);
         }
         setTimeout(() => setFeedbackMessage(null), 4000);
       });
@@ -258,6 +277,30 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
         )}
       </div>
 
+      {/* Status Filter (active / inactive) */}
+      <div className="flex items-center gap-2">
+        {(['all', 'active', 'inactive'] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => handleStatusFilterChange(value)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
+              statusFilter === value
+                ? 'bg-mosque text-white border-mosque shadow-xs'
+                : 'bg-white text-nordic-dark/70 border-nordic-dark/15 hover:border-mosque/40 hover:text-nordic-dark'
+            }`}
+          >
+            {t(
+              value === 'all'
+                ? 'dashboard.filterAll'
+                : value === 'active'
+                  ? 'dashboard.filterActive'
+                  : 'dashboard.filterInactive'
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Property List Container */}
       <div
         ref={listContainerRef}
@@ -289,7 +332,9 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
             {paginatedProperties.map((prop) => (
               <div
                 key={prop.id}
-                className="group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 hover:bg-background-light/60 transition-colors items-center"
+                className={`group grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-5 hover:bg-background-light/60 transition-colors items-center ${
+                  prop.isActive ? '' : 'bg-gray-50/80'
+                }`}
               >
                 {/* Details */}
                 <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
@@ -299,12 +344,14 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
                       alt={prop.imageAlt || prop.title}
                       fill
                       unoptimized
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className={`object-cover transition-transform duration-500 group-hover:scale-105 ${
+                        prop.isActive ? '' : 'grayscale opacity-60'
+                      }`}
                     />
                   </div>
                   <div className="min-w-0">
                     <Link
-                      href={`/properties/${prop.slug}`}
+                      href={prop.isActive ? `/properties/${prop.slug}` : `/dashboard/properties/${prop.id}/edit`}
                       className="text-base font-bold text-nordic-dark group-hover:text-mosque transition-colors line-clamp-1"
                     >
                       {prop.title}
@@ -341,31 +388,39 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
                 </div>
 
                 {/* Status */}
-                <div className="col-span-6 md:col-span-2">
-                  {prop.listingType === 'sale' ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-hint-green text-mosque border border-mosque/15">
+                <div className="col-span-6 md:col-span-2 flex flex-col items-start gap-1">
+                  {prop.isActive ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-hint-green text-mosque border border-mosque/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-mosque mr-1.5"></span>
-                      Activo (Venta)
+                      {t('dashboard.active')}
                     </span>
                   ) : (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>
-                      Renta
+                    <span
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-300"
+                      title={t('dashboard.hiddenFromSite')}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
+                      {t('dashboard.inactive')}
                     </span>
                   )}
+                  <span className="text-[11px] font-medium text-nordic-dark/60 pl-1">
+                    {prop.listingType === 'sale' ? t('market.forSale') : t('market.forRent')}
+                  </span>
                 </div>
 
                 {/* Actions */}
                 <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-1.5">
-                  <Link
-                    href={`/properties/${prop.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-lg text-nordic-dark/60 hover:text-mosque hover:bg-hint-green/30 transition-all"
-                    title={t('dashboard.viewOnSite')}
-                  >
-                    <span className="material-icons text-xl">open_in_new</span>
-                  </Link>
+                  {prop.isActive && (
+                    <Link
+                      href={`/properties/${prop.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-lg text-nordic-dark/60 hover:text-mosque hover:bg-hint-green/30 transition-all"
+                      title={t('dashboard.viewOnSite')}
+                    >
+                      <span className="material-icons text-xl">open_in_new</span>
+                    </Link>
+                  )}
 
                   <Link
                     href={`/dashboard/properties/${prop.id}/edit`}
@@ -377,11 +432,18 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
 
                   <button
                     type="button"
-                    onClick={() => handleDelete(prop.id, prop.title)}
-                    className="p-2 rounded-lg text-nordic-dark/60 hover:text-red-600 hover:bg-red-50 transition-all cursor-pointer"
-                    title={t('dashboard.delete')}
+                    onClick={() => handleToggleActive(prop)}
+                    className={`p-2 rounded-lg transition-all cursor-pointer ${
+                      prop.isActive
+                        ? 'text-nordic-dark/60 hover:text-amber-700 hover:bg-amber-50'
+                        : 'text-nordic-dark/60 hover:text-mosque hover:bg-hint-green/30'
+                    }`}
+                    title={t(prop.isActive ? 'dashboard.deactivate' : 'dashboard.activate')}
+                    aria-label={t(prop.isActive ? 'dashboard.deactivate' : 'dashboard.activate')}
                   >
-                    <span className="material-icons text-xl">delete_outline</span>
+                    <span className="material-icons text-xl">
+                      {prop.isActive ? 'visibility_off' : 'visibility'}
+                    </span>
                   </button>
                 </div>
               </div>

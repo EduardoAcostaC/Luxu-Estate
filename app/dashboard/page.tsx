@@ -1,6 +1,6 @@
 import React from 'react';
 import { connection } from 'next/server';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseAuthClient } from '@/lib/supabase/auth-server';
 import { PropertiesManager } from '@/components/dashboard/PropertiesManager';
 import type { Property } from '@/types/property';
 
@@ -14,7 +14,8 @@ const priceFormatter = new Intl.NumberFormat('en-US', {
 
 export default async function DashboardPropertiesPage() {
   await connection();
-  const supabase = createSupabaseServerClient();
+  // Authenticated client: staff RLS policy also exposes inactive properties here.
+  const supabase = await createSupabaseAuthClient();
   const { data, error } = await supabase
     .from('properties')
     .select('*')
@@ -41,6 +42,7 @@ export default async function DashboardPropertiesPage() {
     listingType: row.listing_type,
     propertyType: row.property_type,
     isFeatured: row.is_featured,
+    isActive: row.is_active !== false,
   }));
 
   return <PropertiesManager initialProperties={properties} />;

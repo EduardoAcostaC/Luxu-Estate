@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseAuthClient } from '@/lib/supabase/auth-server';
 import type { Database } from '@/lib/supabase/database.types';
 import { PAGE_SIZE, type HomeFilters } from '@/lib/home-params';
 import type { Property, PropertyDetail, PropertyImage } from '@/types/property';
@@ -39,6 +40,7 @@ function rowToProperty(row: PropertyRow): Property {
     listingType: row.listing_type,
     propertyType: row.property_type,
     isFeatured: row.is_featured,
+    isActive: row.is_active !== false,
   };
 }
 
@@ -144,7 +146,8 @@ export async function getPropertiesCount(filters: FilterArgs): Promise<number> {
   const { count, error } = await applyFilters(
     supabase
       .from('properties')
-      .select('id', { count: 'exact', head: true }),
+      .select('id', { count: 'exact', head: true })
+      .eq('is_active', true),
     filters
   );
   if (error) {
@@ -172,6 +175,7 @@ export async function getMarketProperties(filters: HomeFilters): Promise<MarketP
     supabase
       .from('properties')
       .select('*', { count: 'exact' })
+      .eq('is_active', true)
       .eq('is_featured', false)
       .order('created_at', { ascending: false })
       .order('id', { ascending: true })
@@ -185,6 +189,7 @@ export async function getMarketProperties(filters: HomeFilters): Promise<MarketP
         supabase
           .from('properties')
           .select('id', { count: 'exact', head: true })
+          .eq('is_active', true)
           .eq('is_featured', false),
         filters
       );
@@ -220,6 +225,7 @@ export async function getFeaturedProperties(filters: FilterArgs): Promise<Proper
     supabase
       .from('properties')
       .select('*')
+      .eq('is_active', true)
       .eq('is_featured', true)
       .order('created_at', { ascending: false })
       .order('id', { ascending: true })
@@ -242,6 +248,7 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
     .from('properties')
     .select('*, property_images(*)')
     .eq('slug', slug)
+    .eq('is_active', true)
     .maybeSingle();
 
   if (error || !data) {
@@ -252,9 +259,12 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
   return rowToPropertyDetail(data, images);
 }
 
-/** Fetches a single property by UUID id with its gallery images. */
+/**
+ * Fetches a single property by UUID id with its gallery images.
+ * Dashboard-only: uses the authenticated session so staff can also load inactive properties.
+ */
 export async function getPropertyById(id: string): Promise<PropertyDetail | null> {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseAuthClient();
   const { data, error } = await supabase
     .from('properties')
     .select('*, property_images(*)')
@@ -276,7 +286,7 @@ export async function getAllPropertySlugs(): Promise<string[]> {
   cacheTag('properties');
 
   const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase.from('properties').select('slug');
+  const { data, error } = await supabase.from('properties').select('slug').eq('is_active', true);
   if (error || !data) return [];
   return data.map((d) => d.slug).filter((s): s is string => Boolean(s));
 }

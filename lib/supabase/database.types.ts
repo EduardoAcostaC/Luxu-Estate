@@ -31,6 +31,7 @@ export type Database = {
           id: string
           image_alt: string
           image_url: string
+          is_active: boolean
           is_featured: boolean
           latitude: number | null
           listing_type: Database["public"]["Enums"]["listing_type"]
@@ -59,6 +60,7 @@ export type Database = {
           id?: string
           image_alt: string
           image_url: string
+          is_active?: boolean
           is_featured?: boolean
           latitude?: number | null
           listing_type: Database["public"]["Enums"]["listing_type"]
@@ -87,6 +89,7 @@ export type Database = {
           id?: string
           image_alt?: string
           image_url?: string
+          is_active?: boolean
           is_featured?: boolean
           latitude?: number | null
           listing_type?: Database["public"]["Enums"]["listing_type"]

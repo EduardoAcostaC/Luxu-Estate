@@ -24,6 +24,8 @@ export interface Property {
   listingType: 'sale' | 'rent'; // 'sale' or 'rent'
   propertyType: 'House' | 'Apartment' | 'Villa' | 'Penthouse';
   isFeatured?: boolean;
+  /** Inactive properties are hidden from the public site but kept in the admin panel. */
+  isActive: boolean;
 }
 
 export interface PropertyDetail extends Property {
