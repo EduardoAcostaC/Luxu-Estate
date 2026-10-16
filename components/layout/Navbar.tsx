@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -30,9 +30,12 @@ export const NavbarWithSearchParams: React.FC = () => {
   return <Navbar filters={filters} />;
 };
 
+const emptySubscribe = () => () => {};
+
 export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const { savedIds, view, setView } = useSavedHomes();
@@ -159,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
             </button>
 
             {/* Profile / Auth Section */}
-            {loading ? (
+            {!mounted || loading ? (
               <div className="w-9 h-9 rounded-full bg-nordic-dark/10 animate-pulse" />
             ) : user ? (
               <div className="relative pl-2 border-l border-nordic-dark/10" ref={profileMenuRef}>
@@ -304,7 +307,7 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
       >
         <div className="px-4 space-y-1">
           {/* User profile banner in mobile */}
-          {user && (
+          {mounted && user && (
             <div className="mb-3 p-3 rounded-lg bg-black/5 flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden relative flex-shrink-0">
@@ -351,7 +354,7 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
             );
           })}
 
-          {user && (
+          {mounted && user && (
             <Link
               href="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
@@ -362,7 +365,7 @@ export const Navbar: React.FC<NavbarProps> = ({ filters = DEFAULT_FILTERS }) => 
             </Link>
           )}
 
-          {!user && !loading && (
+          {mounted && !user && !loading && (
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}

@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import React, { useState, useEffect, useId, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  CATEGORIES,
   FILTER_AMENITIES,
   buildHomeHref,
   type HomeFilters,
@@ -450,7 +450,7 @@ export const FiltersModal: React.FC<FiltersModalProps> = ({
                     >
                       {icon}
                     </span>
-                    <span>{t(`amenities.${item}`)}</span>
+                    <span>{t(`amenities.${item}`)?.startsWith('amenities.') ? item : t(`amenities.${item}`)}</span>
                     {isActive && (
                       <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
                     )}

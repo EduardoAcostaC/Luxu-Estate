@@ -252,6 +252,23 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
   return rowToPropertyDetail(data, images);
 }
 
+/** Fetches a single property by UUID id with its gallery images. */
+export async function getPropertyById(id: string): Promise<PropertyDetail | null> {
+  const supabase = createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('properties')
+    .select('*, property_images(*)')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const images = (data.property_images as PropertyImageRow[]) ?? [];
+  return rowToPropertyDetail(data, images);
+}
+
 /** Returns all slugs for static generation or sitemaps. */
 export async function getAllPropertySlugs(): Promise<string[]> {
   'use cache';

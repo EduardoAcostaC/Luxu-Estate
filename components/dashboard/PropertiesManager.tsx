@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Property } from '@/types/property';
 import { useLanguage } from '@/lib/i18n';
+import { deletePropertyAction } from '@/lib/property-actions';
 
 interface PropertiesManagerProps {
   initialProperties: Property[];
@@ -33,6 +34,7 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
   const [listingFilter, setListingFilter] = useState<'all' | 'sale' | 'rent'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
   const listContainerRef = useRef<HTMLDivElement>(null);
 
   // Stats calculation
@@ -97,16 +99,17 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
 
   const handleDelete = (id: string, title: string) => {
     if (confirm(`¿Estás seguro de que deseas eliminar la propiedad "${title}"?`)) {
-      setProperties((prev) => prev.filter((p) => p.id !== id));
-      setFeedbackMessage(`Propiedad "${title}" archivada del panel.`);
-      setTimeout(() => setFeedbackMessage(null), 4000);
+      startTransition(async () => {
+        const res = await deletePropertyAction(id);
+        if (res.success) {
+          setProperties((prev) => prev.filter((p) => p.id !== id));
+          setFeedbackMessage(`Propiedad "${title}" eliminada con éxito.`);
+        } else {
+          setFeedbackMessage(`Error al eliminar: ${res.error || 'Inténtalo de nuevo'}`);
+        }
+        setTimeout(() => setFeedbackMessage(null), 4000);
+      });
     }
-  };
-
-  const handleAddNew = () => {
-    alert(
-      'Formulario de creación de propiedad disponible en la versión completa de administración.'
-    );
   };
 
   return (
@@ -172,13 +175,13 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
             </button>
           </div>
 
-          <button
-            onClick={handleAddNew}
+          <Link
+            href="/dashboard/properties/new"
             className="bg-mosque hover:bg-primary-dark text-white px-4 py-2.5 rounded-lg text-sm font-medium shadow-md shadow-mosque/20 transition-all transform hover:-translate-y-0.5 inline-flex items-center gap-2 cursor-pointer"
           >
             <span className="material-icons text-base">add</span>
             <span>{t('dashboard.addNewProperty')}</span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -364,16 +367,13 @@ export function PropertiesManager({ initialProperties }: PropertiesManagerProps)
                     <span className="material-icons text-xl">open_in_new</span>
                   </Link>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      alert(`Edición de la propiedad "${prop.title}" en desarrollo.`)
-                    }
+                  <Link
+                    href={`/dashboard/properties/${prop.id}/edit`}
                     className="p-2 rounded-lg text-nordic-dark/60 hover:text-mosque hover:bg-hint-green/30 transition-all cursor-pointer"
                     title={t('dashboard.edit')}
                   >
                     <span className="material-icons text-xl">edit</span>
-                  </button>
+                  </Link>
 
                   <button
                     type="button"

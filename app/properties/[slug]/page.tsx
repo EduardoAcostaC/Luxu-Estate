@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Navbar, NavbarWithSearchParams } from '@/components/layout/Navbar';
 import { getPropertyBySlug, getAllPropertySlugs } from '@/lib/properties';

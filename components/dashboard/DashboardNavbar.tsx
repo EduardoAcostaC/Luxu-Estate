@@ -40,7 +40,7 @@ export function DashboardNavbar({ currentUserRole = 'admin' }: DashboardNavbarPr
     {
       href: '/dashboard',
       label: t('dashboard.propertiesTab'),
-      active: pathname === '/dashboard',
+      active: pathname === '/dashboard' || pathname.startsWith('/dashboard/properties'),
       icon: 'apartment',
     },
     {

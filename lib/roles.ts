@@ -133,7 +133,7 @@ export async function updateUserRole(
   newRole: AppRole
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { isAdmin, userId } = await getCurrentUserRole();
+    const { isAdmin } = await getCurrentUserRole();
     if (!isAdmin) {
       return { success: false, error: 'Unauthorized: Only administrators can modify user roles.' };
     }
